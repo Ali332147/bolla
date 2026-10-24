@@ -44,11 +44,11 @@ const T = {
 };
 
 const EXTRA = {
-  en: { sno:"S.No", amount:"Amount", dayReport:"Day Report", time:"Time", total:"Total:", bkDiff:"B.K. Diff:", refund:"Refund:", grandTotal:"Grand Total:", clear:"Clear Entries", confirmClear:"Clear all rows and reset B.K. Diff and Refund?" },
+  en: { sno:"S.No", amount:"Amount", dayReport:"Daily Report", time:"Time", total:"Total:", bkDiff:"B.K. Diff:", refund:"Refund:", grandTotal:"Grand Total:", clear:"Clear Entries", confirmClear:"Clear all rows and reset B.K. Diff and Refund?" },
   es: { sno:"N.º", amount:"Monto", dayReport:"Reporte del día", time:"Hora", total:"Total:", bkDiff:"Dif. B.K.:", refund:"Reembolso:", grandTotal:"Total general:", clear:"Borrar entradas", confirmClear:"¿Borrar todas las filas y reiniciar Dif. B.K. y Reembolso?" },
-  hi: { sno:"क्र.सं.", amount:"राशि", dayReport:"दिन की रिपोर्ट", time:"समय", total:"कुल:", bkDiff:"B.K. अंतर:", refund:"रिफंड:", grandTotal:"कुल योग:", clear:"एंट्री साफ़ करें", confirmClear:"सभी पंक्तियाँ साफ़ करें और B.K. अंतर व रिफंड रीसेट करें?" },
+  hi: { sno:"क्र.सं.", amount:"राशि", dayReport:"Daily Report", time:"समय", total:"कुल:", bkDiff:"B.K. अंतर:", refund:"रिफंड:", grandTotal:"कुल योग:", clear:"एंट्री साफ़ करें", confirmClear:"सभी पंक्तियाँ साफ़ करें और B.K. अंतर व रिफंड रीसेट करें?" },
   ur: { sno:"نمبر شمار", amount:"رقم", dayReport:"دن کی رپورٹ", time:"وقت", total:"کل:", bkDiff:"B.K. فرق:", refund:"واپسی:", grandTotal:"مجموعی کل:", clear:"اندراجات صاف کریں", confirmClear:"تمام قطاریں صاف کریں اور B.K. فرق و واپسی ری سیٹ کریں؟" },
-  bn: { sno:"ক্রমিক", amount:"পরিমাণ", dayReport:"দিনের রিপোর্ট", time:"সময়", total:"মোট:", bkDiff:"B.K. পার্থক্য:", refund:"রিফান্ড:", grandTotal:"সর্বমোট:", clear:"এন্ট্রি মুছুন", confirmClear:"সব সারি মুছে B.K. পার্থক্য ও রিফান্ড রিসেট করবেন?" }
+  bn: { sno:"ক্রমিক", amount:"পরিমাণ", dayReport:"Daily Report", time:"সময়", total:"মোট:", bkDiff:"B.K. পার্থক্য:", refund:"রিফান্ড:", grandTotal:"সর্বমোট:", clear:"এন্ট্রি মুছুন", confirmClear:"সব সারি মুছে B.K. পার্থক্য ও রিফান্ড রিসেট করবেন?" }
 };
 const LABELS2 = {
   en: { storeLabel:"Store:", nameLabel:"Name:" }, es: { storeLabel:"Tienda:", nameLabel:"Nombre:" },
