@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#174b30">
+  <title>Bolla | Attendance | Ihsan (TM)</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar no-print">
+    <a class="logo" href="#" aria-label="Bolla Market"><img src="logo.png" alt="Bolla Market"></a>
+    <nav class="menu" aria-label="Main menu">
+      <div class="dd" id="ddName"></div>
+      <div class="dd" id="ddStore"></div>
+      <div class="dd" id="ddReport"></div>
+      <button class="tab" id="uploadTab" data-i18n="upload">Upload</button>
+    </nav>
+    <select id="lang" aria-label="Language">
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="hi">हिन्दी</option>
+      <option value="ur">اردو</option>
+      <option value="bn">বাংলা</option>
+    </select>
+  </header>
+
+  <div id="storageWarn" class="storage-warn no-print" data-i18n="storageWarn" hidden></div>
+
+  <main class="sheet">
+    <a class="wa-float no-print" href="https://wa.me/19174352695" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp: +1 (917) 435-2695">
+      <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" focusable="false"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </a>
+    <!-- Paper form: every label, header, title and cell is editable -->
+    <section class="panel active" id="tab-main">
+      <div class="report-watermark" aria-hidden="true">Bolla Market</div>
+      <div class="marquee"><h2 class="paper-heading" id="marqueeText" data-i18n="Bolla Market" contenteditable="true" spellcheck="false">Bolla Market</h2></div>
+      <div class="report-meta-row">
+        <div class="global-search no-print" role="search">
+          <input id="globalSearch" type="search" placeholder="Search name or store..." aria-label="Search name or store" autocomplete="off">
+          <div id="globalSearchResults" class="global-search-results" hidden></div>
+        </div>
+        <div class="report-meta-details">
+          <div class="paper-date">
+            <span data-i18n="date" contenteditable="true" spellcheck="false">Date:</span>
+            <input id="attDate" type="date" aria-label="Report date">
+          </div>
+          <div class="sheet-info">
+            <span><span data-i18n="storeLabel" contenteditable="true" spellcheck="false">Store:</span> <b id="sheetStore"></b></span>
+            <span><span data-i18n="nameLabel" contenteditable="true" spellcheck="false">Name:</span> <b id="sheetName"></b></span>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="form-table" aria-label="Daily report entries">
+          <thead><tr>
+            <th data-i18n="sno" contenteditable="true" spellcheck="false">S.No</th>
+            <th data-i18n="amount" contenteditable="true" spellcheck="false">Amount</th>
+            <th data-i18n="dayReport" contenteditable="true" spellcheck="false">Day Report</th>
+            <th data-i18n="time" contenteditable="true" spellcheck="false">Time</th>
+          </tr></thead>
+          <tbody id="entryRows"></tbody>
+        </table>
+      </div>
+      <datalist id="shiftList"></datalist>
+      <section class="totals" aria-label="Daily totals">
+        <div class="total-line"><span data-i18n="total" contenteditable="true" spellcheck="false">Total:</span><div class="money"><span class="currency">$</span><input id="total" type="number" step="0.01" value="0.00"></div></div>
+        <div class="total-line"><span data-i18n="bkDiff" contenteditable="true" spellcheck="false">B.K. Diff:</span><div class="money"><span class="currency">$</span><input id="bkDiff" type="number" step="0.01" value="0"></div></div>
+        <div class="total-line"><span data-i18n="refund" contenteditable="true" spellcheck="false">Refund:</span><div class="money"><span class="currency">$</span><input id="refund" type="number" step="0.01" min="0" value="0"></div></div>
+        <div class="total-line"><span data-i18n="grandTotal" contenteditable="true" spellcheck="false">Grand Total:</span><div class="money"><span class="currency">$</span><input id="grandTotal" type="number" step="0.01" value="0.00"></div></div>
+      </section>
+      <div class="actions no-print">
+        <button class="secondary" id="clearBtn" data-i18n="clear">Clear Entries</button>
+        <button class="secondary" id="pngBtn" data-i18n="pdf">Download PDF</button>
+        <button class="secondary" id="excelBtn" data-i18n="excel">Download Excel</button>
+        <button id="printBtn" data-i18n="print">Print</button>
+      </div>
+      <p class="print-footer">Bolla | Attendance | Ihsan (TM)</p>
+    </section>
+
+    <!-- Upload -->
+    <section class="panel no-print" id="tab-upload">
+      <label class="drop-zone" for="fileInput" id="dropZone">
+        <strong data-i18n="choose">Choose files or drag them here</strong>
+        <span data-i18n="anyType">Multiple files · Any file type</span>
+        <input id="fileInput" type="file" multiple>
+      </label>
+      <div id="fileList" class="file-list"></div>
+      <div class="backup">
+        <strong data-i18n="backupTitle">Backup</strong>
+        <button class="secondary" id="backupBtn" type="button" data-i18n="backupDown">Download backup</button>
+        <button class="secondary" id="restoreBtn" type="button" data-i18n="backupRestore">Restore backup</button>
+        <input id="restoreInput" type="file" accept="application/json,.json" hidden>
+      </div>
+      <label class="submission-label" for="note" data-i18n="note">Note (optional)</label>
+      <textarea id="note" rows="2"></textarea>
+      <button id="submitBtn" data-i18n="prepare">Prepare Submission</button>
+      <p class="submission-status" id="status" role="status" data-i18n="localOnly">Files stay in this browser. Online upload needs a connected server.</p>
+    </section>
+  </main>
+  <footer class="site-footer no-print">
+    <p>&copy; <span id="year">2026</span> Bolla. All rights reserved.</p>
+  </footer>
+
+  <script src="html2canvas.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
