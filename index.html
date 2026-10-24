@@ -8,14 +8,60 @@
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="locked">
+  <!-- Login / Register screen: the app stays hidden until you sign in -->
+  <div id="authScreen" class="auth-screen" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-card">
+      <img class="auth-logo" src="logo.png" alt="Bolla Market">
+      <h1 id="authTitle">Bolla Market</h1>
+      <p class="auth-sub">Attendance &amp; Daily Report</p>
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="auth-tab active" id="tabLogin" role="tab" aria-selected="true">Login</button>
+        <button type="button" class="auth-tab" id="tabRegister" role="tab" aria-selected="false">Register</button>
+      </div>
+
+      <form id="loginForm" class="auth-form" novalidate>
+        <label for="loginUser">Email</label>
+        <input id="loginUser" type="email" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="254" placeholder="name@example.com">
+        <label for="loginPass">Password</label>
+        <div class="pass-wrap">
+          <input id="loginPass" type="password" autocomplete="current-password" maxlength="128">
+          <button type="button" class="show-pass" data-target="loginPass" aria-label="Show password">Show</button>
+        </div>
+        <label class="check"><input id="loginRemember" type="checkbox" checked> Keep me signed in on this device</label>
+        <p class="auth-error" id="loginError" role="alert" hidden></p>
+        <button type="submit" class="auth-submit">Login</button>
+      </form>
+
+      <form id="registerForm" class="auth-form" novalidate hidden>
+        <label for="regName">Full name</label>
+        <input id="regName" type="text" autocomplete="name" maxlength="50">
+        <label for="regMobile">Mobile number</label>
+        <input id="regMobile" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="+1 917 435 2695">
+        <label for="regUser">Email</label>
+        <input id="regUser" type="email" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="254" placeholder="name@example.com">
+        <label for="regPass">Password</label>
+        <div class="pass-wrap">
+          <input id="regPass" type="password" autocomplete="new-password" maxlength="128">
+          <button type="button" class="show-pass" data-target="regPass" aria-label="Show password">Show</button>
+        </div>
+        <small class="auth-hint">At least 8 characters, with a letter and a number.</small>
+        <label for="regPass2">Confirm password</label>
+        <input id="regPass2" type="password" autocomplete="new-password" maxlength="128">
+        <p class="auth-error" id="registerError" role="alert" hidden></p>
+        <button type="submit" class="auth-submit">Create account</button>
+      </form>
+    </div>
+  </div>
+
   <header class="topbar no-print">
     <a class="logo" href="#" aria-label="Bolla Market"><img src="logo.png" alt="Bolla Market"></a>
     <nav class="menu" aria-label="Main menu">
       <div class="dd" id="ddName"></div>
       <div class="dd" id="ddStore"></div>
       <div class="dd" id="ddReport"></div>
-      <button class="tab" id="uploadTab" data-i18n="upload">Upload</button>
+      <div class="dd" id="ddPresent"></div>
+      <button class="tab" id="logoutTab" type="button"><span data-i18n="logout">Logout</span><small id="userChip"></small></button>
     </nav>
     <select id="lang" aria-label="Language">
       <option value="en">English</option>
@@ -49,6 +95,7 @@
           <div class="sheet-info">
             <span><span data-i18n="storeLabel" contenteditable="true" spellcheck="false">Store:</span> <b id="sheetStore"></b></span>
             <span><span data-i18n="nameLabel" contenteditable="true" spellcheck="false">Name:</span> <b id="sheetName"></b></span>
+            <span><span data-i18n="attLabel" contenteditable="true" spellcheck="false">Attendance:</span> <b id="sheetAtt"></b></span>
           </div>
         </div>
       </div>
@@ -57,7 +104,7 @@
           <thead><tr>
             <th data-i18n="sno" contenteditable="true" spellcheck="false">S.No</th>
             <th data-i18n="amount" contenteditable="true" spellcheck="false">Amount</th>
-            <th data-i18n="dayReport" contenteditable="true" spellcheck="false">Daily Report</th>
+            <th data-i18n="dayReport" contenteditable="true" spellcheck="false">Shift</th>
             <th data-i18n="time" contenteditable="true" spellcheck="false">Time</th>
           </tr></thead>
           <tbody id="entryRows"></tbody>
@@ -70,6 +117,10 @@
         <div class="total-line"><span data-i18n="refund" contenteditable="true" spellcheck="false">Refund:</span><div class="money"><span class="currency">$</span><input id="refund" type="number" step="0.01" min="0" value="0"></div></div>
         <div class="total-line"><span data-i18n="grandTotal" contenteditable="true" spellcheck="false">Grand Total:</span><div class="money"><span class="currency">$</span><input id="grandTotal" type="number" step="0.01" value="0.00"></div></div>
       </section>
+      <section class="nb-box" id="nbBox" aria-label="Notes">
+        <span class="nb-label" data-i18n="nb" contenteditable="true" spellcheck="false">N.B:</span>
+        <textarea id="nbText" rows="3" spellcheck="false" aria-label="N.B notes"></textarea>
+      </section>
       <div class="actions no-print">
         <button class="secondary" id="clearBtn" data-i18n="clear">Clear Entries</button>
         <button class="secondary" id="pngBtn" data-i18n="pdf">Download PDF</button>
@@ -79,24 +130,30 @@
       <p class="print-footer">Bolla | Attendance | Ihsan (TM)</p>
     </section>
 
-    <!-- Upload -->
-    <section class="panel no-print" id="tab-upload">
-      <label class="drop-zone" for="fileInput" id="dropZone">
-        <strong data-i18n="choose">Choose files or drag them here</strong>
-        <span data-i18n="anyType">Multiple files · Any file type</span>
-        <input id="fileInput" type="file" multiple>
-      </label>
-      <div id="fileList" class="file-list"></div>
-      <div class="backup">
-        <strong data-i18n="backupTitle">Backup</strong>
-        <button class="secondary" id="backupBtn" type="button" data-i18n="backupDown">Download backup</button>
-        <button class="secondary" id="restoreBtn" type="button" data-i18n="backupRestore">Restore backup</button>
-        <input id="restoreInput" type="file" accept="application/json,.json" hidden>
+
+    <!-- Registered users: Active = signed in now, Inactive = signed out -->
+    <section class="panel" id="tab-users">
+      <h2 class="users-title" data-i18n="regTitle">Registered Users</h2>
+      <p class="users-meta"><span data-i18n="date">Date:</span> <b id="usersDate"></b> &nbsp;·&nbsp; <span id="usersCounts"></span></p>
+      <div class="table-wrap">
+        <table class="form-table users-table" aria-label="Registered users">
+          <thead><tr>
+            <th data-i18n="sno">S.No</th>
+            <th data-i18n="name">Name</th>
+            <th data-i18n="mobile">Mobile number</th>
+            <th data-i18n="email">Email</th>
+            <th data-i18n="status">Status</th>
+          </tr></thead>
+          <tbody id="usersRows"></tbody>
+        </table>
       </div>
-      <label class="submission-label" for="note" data-i18n="note">Note (optional)</label>
-      <textarea id="note" rows="2"></textarea>
-      <button id="submitBtn" data-i18n="prepare">Prepare Submission</button>
-      <p class="submission-status" id="status" role="status" data-i18n="localOnly">Files stay in this browser. Online upload needs a connected server.</p>
+      <div class="actions no-print">
+        <button class="secondary" id="usersBack" type="button" data-i18n="back">Back</button>
+        <button class="secondary" id="usersPdf" type="button" data-i18n="pdf">Download PDF</button>
+        <button id="usersPrint" type="button" data-i18n="print">Print</button>
+      </div>
+      <p class="hint no-print">Shows accounts registered on this device. Active = signed in right now.</p>
+      <p class="print-footer">Bolla | Attendance | Ihsan (TM)</p>
     </section>
   </main>
   <footer class="site-footer no-print">

@@ -5,6 +5,8 @@ const STAFF = [
   "Hasan", "Rubel", "Sohel", "Nayeem", "Rafi",
   "Imran", "Mizan", "Salman", "Arif", "Shakil"
 ];
+// Name dropdown shows names A to Z.
+const STAFF_SORTED = [...STAFF].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 const STORES = ["3239", "3240", "3241", "3242", "3243"]; // replace with your real store numbers
 const SHIFTS = ["day", "afternoon", "night"];
 const ADDRESS = "Sunrise Hwy, Islip Terrace, NY 11752";
@@ -44,17 +46,38 @@ const T = {
 };
 
 const EXTRA = {
-  en: { sno:"S.No", amount:"Amount", dayReport:"Daily Report", time:"Time", total:"Total:", bkDiff:"B.K. Diff:", refund:"Refund:", grandTotal:"Grand Total:", clear:"Clear Entries", confirmClear:"Clear all rows and reset B.K. Diff and Refund?" },
-  es: { sno:"N.º", amount:"Monto", dayReport:"Reporte del día", time:"Hora", total:"Total:", bkDiff:"Dif. B.K.:", refund:"Reembolso:", grandTotal:"Total general:", clear:"Borrar entradas", confirmClear:"¿Borrar todas las filas y reiniciar Dif. B.K. y Reembolso?" },
-  hi: { sno:"क्र.सं.", amount:"राशि", dayReport:"Daily Report", time:"समय", total:"कुल:", bkDiff:"B.K. अंतर:", refund:"रिफंड:", grandTotal:"कुल योग:", clear:"एंट्री साफ़ करें", confirmClear:"सभी पंक्तियाँ साफ़ करें और B.K. अंतर व रिफंड रीसेट करें?" },
-  ur: { sno:"نمبر شمار", amount:"رقم", dayReport:"دن کی رپورٹ", time:"وقت", total:"کل:", bkDiff:"B.K. فرق:", refund:"واپسی:", grandTotal:"مجموعی کل:", clear:"اندراجات صاف کریں", confirmClear:"تمام قطاریں صاف کریں اور B.K. فرق و واپسی ری سیٹ کریں؟" },
-  bn: { sno:"ক্রমিক", amount:"পরিমাণ", dayReport:"Daily Report", time:"সময়", total:"মোট:", bkDiff:"B.K. পার্থক্য:", refund:"রিফান্ড:", grandTotal:"সর্বমোট:", clear:"এন্ট্রি মুছুন", confirmClear:"সব সারি মুছে B.K. পার্থক্য ও রিফান্ড রিসেট করবেন?" }
+  en: { sno:"S.No", amount:"Amount", dayReport:"Shift", time:"Time", total:"Total:", bkDiff:"B.K. Diff:", refund:"Refund:", grandTotal:"Grand Total:", clear:"Clear Entries", confirmClear:"Clear all rows and reset B.K. Diff and Refund?" },
+  es: { sno:"N.º", amount:"Monto", dayReport:"Turno", time:"Hora", total:"Total:", bkDiff:"Dif. B.K.:", refund:"Reembolso:", grandTotal:"Total general:", clear:"Borrar entradas", confirmClear:"¿Borrar todas las filas y reiniciar Dif. B.K. y Reembolso?" },
+  hi: { sno:"क्र.सं.", amount:"राशि", dayReport:"शिफ्ट", time:"समय", total:"कुल:", bkDiff:"B.K. अंतर:", refund:"रिफंड:", grandTotal:"कुल योग:", clear:"एंट्री साफ़ करें", confirmClear:"सभी पंक्तियाँ साफ़ करें और B.K. अंतर व रिफंड रीसेट करें?" },
+  ur: { sno:"نمبر شمار", amount:"رقم", dayReport:"شفٹ", time:"وقت", total:"کل:", bkDiff:"B.K. فرق:", refund:"واپسی:", grandTotal:"مجموعی کل:", clear:"اندراجات صاف کریں", confirmClear:"تمام قطاریں صاف کریں اور B.K. فرق و واپسی ری سیٹ کریں؟" },
+  bn: { sno:"ক্রমিক", amount:"পরিমাণ", dayReport:"শিফট", time:"সময়", total:"মোট:", bkDiff:"B.K. পার্থক্য:", refund:"রিফান্ড:", grandTotal:"সর্বমোট:", clear:"এন্ট্রি মুছুন", confirmClear:"সব সারি মুছে B.K. পার্থক্য ও রিফান্ড রিসেট করবেন?" }
 };
 const LABELS2 = {
   en: { storeLabel:"Store:", nameLabel:"Name:" }, es: { storeLabel:"Tienda:", nameLabel:"Nombre:" },
   hi: { storeLabel:"स्टोर:", nameLabel:"नाम:" }, ur: { storeLabel:"اسٹور:", nameLabel:"نام:" },
   bn: { storeLabel:"স্টোর:", nameLabel:"নাম:" }
 };
+const MENU_LABELS = {
+  en: { shift:"Shift", attLabel:"Attendance:" }, es: { shift:"Turno", attLabel:"Asistencia:" },
+  hi: { shift:"शिफ्ट", attLabel:"उपस्थिति:" }, ur: { shift:"شفٹ", attLabel:"حاضری:" }, bn: { shift:"শিফট", attLabel:"উপস্থিতি:" }
+};
+Object.keys(MENU_LABELS).forEach(l => Object.assign(EXTRA[l], MENU_LABELS[l]));
+const USERS_LABELS = {
+  en: { active:"Active", inactive:"Inactive", mobile:"Mobile number", email:"Email", regTitle:"Registered Users", regList:"Registered List", back:"Back" },
+  es: { active:"Activo", inactive:"Inactivo", mobile:"Número de móvil", email:"Correo", regTitle:"Usuarios registrados", regList:"Lista registrada", back:"Atrás" },
+  hi: { active:"सक्रिय", inactive:"निष्क्रिय", mobile:"मोबाइल नंबर", email:"ईमेल", regTitle:"पंजीकृत उपयोगकर्ता", regList:"पंजीकृत सूची", back:"वापस" },
+  ur: { active:"فعال", inactive:"غیر فعال", mobile:"موبائل نمبر", email:"ای میل", regTitle:"رجسٹرڈ صارفین", regList:"رجسٹرڈ فہرست", back:"واپس" },
+  bn: { active:"সক্রিয়", inactive:"নিষ্ক্রিয়", mobile:"মোবাইল নম্বর", email:"ইমেল", regTitle:"নিবন্ধিত ব্যবহারকারী", regList:"নিবন্ধিত তালিকা", back:"ফিরে যান" }
+};
+Object.keys(USERS_LABELS).forEach(l => Object.assign(EXTRA[l], USERS_LABELS[l]));
+const AUTH_LABELS = {
+  en: { logout:"Logout", confirmLogout:"Log out of this account?", nb:"N.B:" },
+  es: { logout:"Salir", confirmLogout:"¿Cerrar sesión en esta cuenta?" },
+  hi: { logout:"लॉगआउट", confirmLogout:"इस खाते से लॉगआउट करें?" },
+  ur: { logout:"لاگ آؤٹ", confirmLogout:"اس اکاؤنٹ سے لاگ آؤٹ کریں؟" },
+  bn: { logout:"লগআউট", confirmLogout:"এই অ্যাকাউন্ট থেকে লগআউট করবেন?" }
+};
+Object.keys(AUTH_LABELS).forEach(l => Object.assign(EXTRA[l], AUTH_LABELS[l]));
 const PNG_LABEL = { en:"Download PDF", es:"Descargar PDF", hi:"PDF डाउनलोड", ur:"PDF ڈاؤن لوڈ", bn:"PDF ডাউনলোڈ" };
 const BACKUP = {
   en: { storageWarn:"Warning: this browser is blocking storage, so entries will be lost on refresh. Turn off private mode and use Download backup often.", backupTitle:"Backup", backupDown:"Download backup", backupRestore:"Restore backup", backupBad:"This is not a valid Bolla backup file.", confirmRestore:"Replace everything on this device with the backup?" },
@@ -69,22 +92,31 @@ Object.keys(LABELS2).forEach(l => Object.assign(EXTRA[l], LABELS2[l]));
 Object.keys(EXTRA).forEach(l => Object.assign(T[l], EXTRA[l]));
 
 /* ---------- Helpers ---------- */
-function load(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (_) { return fallback; } }
+let NS = "";   // per-account storage prefix, set after login (nothing is read or written before that)
+function load(key, fallback) {
+  if (!NS) return fallback;
+  try { return JSON.parse(localStorage.getItem(NS + key)) ?? fallback; } catch (_) { return fallback; }
+}
 function save(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)); }
+  if (!NS) return;
+  try { localStorage.setItem(NS + key, JSON.stringify(value)); }
   catch (_) { const w = document.getElementById("storageWarn"); if (w) w.hidden = false; }   // storage blocked or full
 }
 function localDateISO(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/* ---------- State ---------- */
-let lang = load("lang", "en");
-let selName = load("name", STAFF[0]);   // each name has its own sheet
-let selStore = load("store", STORES[0]);
-let selShift = load("shift", "day");    // default Day Report value for new entries
-let sheets = load("sheets", {});        // one paper sheet per date + store
-let labels = load("labels", {});        // edited labels, per language
+/* ---------- State (filled in by initState() after login) ---------- */
+let currentUser = null;
+let lang = "en", selName = "", selStore = "", selShift = "day", sheets = {}, labels = {};
+function initState() {
+  lang = load("lang", "en");
+  selName = load("name", STAFF_SORTED[0]);
+  selStore = load("store", STORES[0]);
+  selShift = load("shift", "day");     // default Shift value for new entries
+  sheets = load("sheets", {});         // one paper sheet per date + store + name
+  labels = load("labels", {});         // edited labels, per language
+}
 const attDate = document.getElementById("attDate");
 attDate.value = localDateISO();
 const t = key => (T[lang] && T[lang][key]) || T.en[key] || key;
@@ -94,19 +126,23 @@ const ROWS = 17;                        // 16 numbered rows + 1 spare row, like 
 const sheetKey = () => `${attDate.value}|${selStore}|${selName}`;   // sheet = date + store + name
 const blankSheet = () => ({
   rows: Array.from({ length: ROWS }, (_, i) => ({ serial: i < 16 ? String(i + 1) : "", amount: "", day: "", time: "", name: "" })),
-  bk: "0", refund: "0", total: "0.00", grand: "0.00"
+  bk: "0", refund: "0", total: "0.00", grand: "0.00", nb: "", att: ""
 });
 const sheet = () => sheets[sheetKey()] || (sheets[sheetKey()] = blankSheet());
 
 /* ---------- Dropdown menu items (Name, Store, Report) ---------- */
 const dropdowns = {
-  ddName:   { label: () => t("name"),   items: () => STAFF.map(n => ({ v: n, l: n })),
+  ddName:   { label: () => t("name"),   items: () => STAFF_SORTED.map(n => ({ v: n, l: n })),
               get: () => selName,   set: v => { selName = v; save("name", v); }, shown: () => selName },
   ddStore:  { label: () => t("store"),  items: () => STORES.map(s => ({ v: s, l: s })),
               get: () => selStore,  set: v => { selStore = v; save("store", v); }, shown: () => selStore },
-  ddReport: { label: () => t("report"), items: () => SHIFTS.map(s => ({ v: s, l: t(s) })),
-              get: () => selShift,  set: v => { selShift = v; save("shift", v); }, shown: () => t(selShift) }
+  ddReport: { label: () => t("shift"), items: () => SHIFTS.map(s => ({ v: s, l: t(s) })),
+              get: () => selShift,  set: v => { selShift = v; save("shift", v); }, shown: () => t(selShift) },
+  // Present / Late / Absent for the selected Name on the selected Date and Store
+  ddPresent: { label: () => t("present"), items: () => [{ v: "", l: "—" }, ...["present", "late", "absent"].map(k => ({ v: k, l: t(k) })), { v: "__list", l: t("regList"), sep: true }],
+              get: () => sheet().att || "", set: v => { if (v === "__list") { showUsers(); return true; } sheet().att = v; save("sheets", sheets); }, shown: () => (sheet().att ? t(sheet().att) : "") }
 };
+
 function renderDropdown(id) {
   const cfg = dropdowns[id], root = document.getElementById(id);
   root.replaceChildren();
@@ -119,10 +155,11 @@ function renderDropdown(id) {
   list.className = "dd-list"; list.setAttribute("role", "listbox");
   cfg.items().forEach(item => {
     const li = document.createElement("li");
+    if (item.sep) li.className = "sep";
     const o = document.createElement("button");
     o.type = "button"; o.textContent = item.l;
     if (item.v === cfg.get()) o.classList.add("sel");
-    o.addEventListener("click", () => { cfg.set(item.v); closeDropdowns(); showMain(); renderAll(); });
+    o.addEventListener("click", () => { const keepPage = cfg.set(item.v); closeDropdowns(); if (!keepPage) showMain(); renderAll(); });
     li.appendChild(o); list.appendChild(li);
   });
   btn.addEventListener("click", e => {
@@ -180,16 +217,9 @@ if (globalSearch) {
 }
 
 /* ---------- Panels ---------- */
-function showMain() {
-  document.getElementById("tab-main").classList.add("active");
-  document.getElementById("tab-upload").classList.remove("active");
-  document.getElementById("uploadTab").classList.remove("active");
-}
-document.getElementById("uploadTab").addEventListener("click", () => {
-  document.getElementById("tab-main").classList.remove("active");
-  document.getElementById("tab-upload").classList.add("active");
-  document.getElementById("uploadTab").classList.add("active");
-});
+// Single page now (Upload removed); kept so the menu and search handlers can still call it.
+function showMain() { $("tab-main").classList.add("active"); $("tab-users").classList.remove("active"); }
+function showUsers() { $("tab-main").classList.remove("active"); $("tab-users").classList.add("active"); renderUsers(); window.scrollTo(0, 0); }
 
 /* ---------- Language + RTL ---------- */
 function applyLang() {
@@ -207,10 +237,14 @@ const nowHHMM = () => { const d = new Date(); return `${String(d.getHours()).pad
 const toMoney = n => (Number.isFinite(n) ? n : 0).toFixed(2);
 
 function persist(s) {
+  if (!currentUser) return;
+  s.nb = $("nbText").value;
   s.bk = $("bkDiff").value; s.refund = $("refund").value;
   s.total = $("total").value; s.grand = $("grandTotal").value;
   save("sheets", sheets);
 }
+function autosize(el) { el.style.height = "auto"; el.style.height = Math.max(84, el.scrollHeight + 2) + "px"; }
+$("nbText").addEventListener("input", e => { autosize(e.target); sheet().nb = e.target.value; save("sheets", sheets); });
 function recalc(s) {
   const total = [...document.querySelectorAll(".amount")].reduce((sum, el) => sum + (parseFloat(el.value) || 0), 0);
   $("total").value = toMoney(total);
@@ -222,6 +256,7 @@ function renderAll() {
   Object.keys(dropdowns).forEach(renderDropdown);
   $("sheetStore").textContent = selStore;
   $("sheetName").textContent = selName;
+  $("sheetAtt").textContent = sheet().att ? t(sheet().att) : "—";
   $("shiftList").replaceChildren(...SHIFTS.map(k => Object.assign(document.createElement("option"), { value: t(k) })));
   const s = sheet();
   const body = $("entryRows");
@@ -230,7 +265,7 @@ function renderAll() {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td><input class="c serial" type="text" aria-label="S.No ${i + 1}"></td>
       <td><div class="amount-wrap"><span class="currency">$</span><input class="c amount" type="number" min="0" step="0.01" inputmode="decimal" aria-label="Amount ${i + 1}"></div></td>
-      <td><input class="c day" list="shiftList" aria-label="Day Report ${i + 1}"></td>
+      <td><input class="c day" list="shiftList" aria-label="Shift ${i + 1}"></td>
       <td><input class="c time" type="time" step="60" aria-label="Time ${i + 1}"></td>`;
     const q = c => tr.querySelector(c);
     q(".serial").value = r.serial; q(".amount").value = r.amount; q(".day").value = r.day;
@@ -257,7 +292,8 @@ function renderAll() {
   });
   $("bkDiff").value = s.bk; $("refund").value = s.refund;
   $("total").value = s.total; $("grandTotal").value = s.grand;
-  renderFiles();
+  $("nbText").value = s.nb || "";
+  autosize($("nbText"));
 }
 attDate.addEventListener("change", () => { if (!attDate.value) attDate.value = localDateISO(); renderAll(); });
 ["bkDiff", "refund"].forEach(id => $(id).addEventListener("input", () => recalc(sheet())));
@@ -273,13 +309,17 @@ document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.ma
 
 $("clearBtn").addEventListener("click", () => {
   if (!confirm(t("confirmClear"))) return;
+  const keepNote = sheet().nb, keepAtt = sheet().att;   // Clear Entries keeps your N.B notes and attendance mark
   sheets[sheetKey()] = blankSheet();
+  sheets[sheetKey()].nb = keepNote || "";
+  sheets[sheetKey()].att = keepAtt || "";
   save("sheets", sheets);
   renderAll();
 });
 
 /* Print-safe text values: some browsers clip number inputs in print preview. */
 window.addEventListener("beforeprint", () => {
+  $("nbBox").dataset.empty = $("nbText").value.trim() ? "no" : "yes";
   document.querySelectorAll("#entryRows tr").forEach(tr => {
     const amount = tr.querySelector(".amount");
     tr.dataset.print = amount.value.trim() ? "yes" : "no";
@@ -299,6 +339,7 @@ window.addEventListener("beforeprint", () => {
   });
 });
 window.addEventListener("afterprint", () => {
+  delete $("nbBox").dataset.empty;
   document.querySelectorAll("#entryRows tr").forEach(tr => {
     tr.dataset.print = "yes";
     tr.querySelector(".print-amount-text")?.remove();
@@ -371,6 +412,11 @@ $("pngBtn").addEventListener("click", async () => {
           el.style.setProperty("background", "transparent", "important");
           el.style.setProperty("background-color", "transparent", "important");
         });
+        const nbText = doc.getElementById("nbText");
+        if (nbText) {
+          if (!nbText.value.trim()) doc.getElementById("nbBox").remove();
+          else { const note = doc.createElement("div"); note.className = "nb-export"; note.textContent = nbText.value; nbText.replaceWith(note); }
+        }
         const m = doc.getElementById("marqueeText");
         if (m) m.classList.add("still");
 
@@ -426,10 +472,12 @@ $("excelBtn").addEventListener("click", () => {
   const s = sheet();
   const th = [...document.querySelectorAll(".form-table th")].map(x => x.textContent);
   const rows = [[document.querySelector(".paper-date span").textContent, attDate.value],
-    [document.querySelector(".sheet-info [data-i18n=storeLabel]").textContent, selStore, document.querySelector(".sheet-info [data-i18n=nameLabel]").textContent, selName], th];
+    [document.querySelector(".sheet-info [data-i18n=storeLabel]").textContent, selStore, document.querySelector(".sheet-info [data-i18n=nameLabel]").textContent, selName,
+      document.querySelector(".sheet-info [data-i18n=attLabel]").textContent, s.att ? t(s.att) : ""], th];
   s.rows.forEach(r => rows.push([r.serial, r.amount === "" ? "" : Number(r.amount), r.day, r.time]));
   rows.push([]);
   document.querySelectorAll(".totals .total-line").forEach(line => rows.push([line.firstElementChild.textContent, Number(line.querySelector("input").value) || 0]));
+  if ((s.nb || "").trim()) rows.push([], [document.querySelector("#nbBox [data-i18n=nb]").textContent, s.nb]);
   const esc = v => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const cell = v => `<Cell><Data ss:Type="${typeof v === "number" ? "Number" : "String"}">${esc(v)}</Data></Cell>`;
   const xml = `<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>
@@ -442,69 +490,95 @@ $("excelBtn").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
-/* ---------- Upload ---------- */
-const files = [];
-const fileList = document.getElementById("fileList");
-const dropZone = document.getElementById("dropZone");
-function renderFiles() {
-  fileList.replaceChildren();
-  files.forEach((file, i) => {
-    const item = document.createElement("div");
-    item.className = "file-item";
-    const info = document.createElement("div");
-    info.className = "file-info";
-    if (file.type && file.type.startsWith("image/")) {
-      const preview = document.createElement("img");
-      preview.className = "file-preview";
-      preview.alt = `Preview of ${file.name}`;
-      preview.src = URL.createObjectURL(file);
-      preview.onload = () => URL.revokeObjectURL(preview.src);
-      info.appendChild(preview);
-    }
-    const label = document.createElement("span");
-    label.className = "file-name";
-    label.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-    info.appendChild(label);
-    const rm = document.createElement("button");
-    rm.type = "button"; rm.className = "remove"; rm.textContent = t("remove");
-    rm.addEventListener("click", () => { files.splice(i, 1); renderFiles(); });
-    item.append(info, rm);
-    fileList.appendChild(item);
+/* ---------- Registered users list: Active (signed in) first, then Inactive ---------- */
+function renderUsers() {
+  const presence = rawGet(localStorage, PRESENCE_KEY, {});
+  const rows = getUsers().map(u => ({ ...u, active: Date.now() - (presence[u.id] || 0) < PRESENCE_TTL }));
+  rows.sort((a, b) => (b.active - a.active) || String(a.name).localeCompare(String(b.name), undefined, { sensitivity: "base" }));
+  const body = $("usersRows");
+  body.replaceChildren();
+  rows.forEach((u, i) => {
+    const tr = document.createElement("tr");
+    const cells = [String(i + 1), u.name || "—", u.mobile || "—", u.username || "—"];
+    cells.forEach((text, c) => { const td = document.createElement("td"); td.textContent = text; if (c) td.className = "left"; tr.appendChild(td); });
+    const st = document.createElement("td");
+    st.textContent = t(u.active ? "active" : "inactive");
+    st.className = u.active ? "st-active" : "st-inactive";
+    tr.appendChild(st);
+    body.appendChild(tr);
   });
+  const active = rows.filter(r => r.active).length;
+  $("usersDate").textContent = `${localDateISO()} ${nowHHMM()}`;
+  $("usersCounts").textContent = `${t("active")}: ${active} · ${t("inactive")}: ${rows.length - active} · ${rows.length}`;
 }
-function addFiles(list) {
-  for (const f of list) {
-    if (!files.some(x => x.name === f.name && x.size === f.size && x.lastModified === f.lastModified)) files.push(f);
-  }
-  renderFiles();
-}
-document.getElementById("fileInput").addEventListener("change", e => { addFiles(e.target.files); e.target.value = ""; });
-["dragenter", "dragover"].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add("drag-active"); }));
-["dragleave", "drop"].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove("drag-active"); }));
-dropZone.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+$("usersBack").addEventListener("click", () => { showMain(); renderAll(); });
+$("usersPrint").addEventListener("click", () => { renderUsers(); window.print(); });
 
-document.getElementById("submitBtn").addEventListener("click", () => {
-  const pack = {
-    store: selStore, name: selName, shift: selShift, date: attDate.value,
-    entries: sheet().rows, total: sheet().total, bkDiff: sheet().bk, refund: sheet().refund, grandTotal: sheet().grand,
-    note: document.getElementById("note").value,
-    attachedFiles: files.map(f => ({ name: f.name, size: f.size, type: f.type || "unknown" })),
-    preparedAt: new Date().toISOString()
-  };
-  const subject = `Bolla submission - Store ${pack.store} - ${pack.name} - ${pack.date}`;
-  const body = [
-    "Bolla Market submission", `Store: ${pack.store}`, `Name: ${pack.name}`, `Shift: ${pack.shift}`, `Date: ${pack.date}`,
-    `Total: $${Number(pack.total || 0).toFixed(2)}`, `B.K. Diff: $${Number(pack.bkDiff || 0).toFixed(2)}`,
-    `Refund: $${Number(pack.refund || 0).toFixed(2)}`, `Grand Total: $${Number(pack.grandTotal || 0).toFixed(2)}`,
-    `Note: ${pack.note || "—"}`, "", "Files to attach:",
-    ...(pack.attachedFiles.length ? pack.attachedFiles.map(f => `- ${f.name} (${(f.size/1024).toFixed(1)} KB)`) : ["- No files selected"]),
-    "", "Please attach the listed files in this email before sending."
-  ].join("\n");
-  const mailto = `mailto:jaber2024@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  const status = document.getElementById("status");
-  status.textContent = "Submission ready — email draft opened. Attach the selected files and press Send in your email app to complete submission.";
-  status.classList.add("submission-pending");
-  window.location.href = mailto;
+// Multi-page PDF from page images (pages: [{ jpeg: Uint8Array, pxW, pxH, ptW, ptH }]).
+function assemblePdf(pages) {
+  const pageW = 612, pageH = 792, margin = 28, enc = new TextEncoder();
+  const chunks = [], offsets = {};
+  let length = 0;
+  const push = b => { chunks.push(b); length += b.length; };
+  const str = v => enc.encode(v);
+  const obj = (n, body) => { offsets[n] = length; push(str(`${n} 0 obj\n${body}\nendobj\n`)); };
+  push(str("%PDF-1.4\n"));
+  obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
+  obj(2, `<< /Type /Pages /Kids [${pages.map((_, i) => `${3 + 3 * i} 0 R`).join(" ")}] /Count ${pages.length} >>`);
+  pages.forEach((p, i) => {
+    const content = `q\n${p.ptW.toFixed(2)} 0 0 ${p.ptH.toFixed(2)} ${((pageW - p.ptW) / 2).toFixed(2)} ${(pageH - margin - p.ptH).toFixed(2)} cm\n/Im0 Do\nQ\n`;
+    obj(3 + 3 * i, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im0 ${5 + 3 * i} 0 R >> >> /Contents ${4 + 3 * i} 0 R >>`);
+    obj(4 + 3 * i, `<< /Length ${str(content).length} >>\nstream\n${content}endstream`);
+    offsets[5 + 3 * i] = length;
+    push(str(`${5 + 3 * i} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${p.pxW} /Height ${p.pxH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.jpeg.length} >>\nstream\n`));
+    push(p.jpeg);
+    push(str("\nendstream\nendobj\n"));
+  });
+  const last = 2 + 3 * pages.length, xrefAt = length;
+  let xref = `xref\n0 ${last + 1}\n0000000000 65535 f \n`;
+  for (let n = 1; n <= last; n++) xref += `${String(offsets[n]).padStart(10, "0")} 00000 n \n`;
+  push(str(`${xref}trailer\n<< /Size ${last + 1} /Root 1 0 R >>\nstartxref\n${xrefAt}\n%%EOF`));
+  return new Blob(chunks, { type: "application/pdf" });
+}
+$("usersPdf").addEventListener("click", async () => {
+  if (typeof html2canvas !== "function") { alert("html2canvas.min.js must be in the same folder as index.html."); return; }
+  const btn = $("usersPdf"), panel = $("tab-users");
+  btn.disabled = true;
+  try {
+    renderUsers();
+    const scale = 2, top = panel.getBoundingClientRect().top;
+    const rowEnds = [...panel.querySelectorAll("#usersRows tr")].map(tr => (tr.getBoundingClientRect().bottom - top) * scale);
+    const canvas = await html2canvas(panel, { scale, backgroundColor: "#ffffff", ignoreElements: el => el.classList && el.classList.contains("no-print") });
+    const contentH = Math.min(canvas.height, Math.ceil((rowEnds.length ? rowEnds[rowEnds.length - 1] : canvas.height) + 24 * scale));
+    const pageW = 612, pageH = 792, margin = 28, k = (pageW - margin * 2) / canvas.width, maxSlice = Math.floor((pageH - margin * 2) / k);
+    const pages = [];
+    for (let start = 0; start < contentH;) {
+      let end = Math.min(start + maxSlice, contentH);
+      if (end < contentH) {   // end each page on a whole row, never through the middle of one
+        const fit = rowEnds.filter(b => b > start + 40 && b <= end);
+        if (fit.length) end = Math.floor(fit[fit.length - 1]);
+      }
+      const slice = document.createElement("canvas");
+      slice.width = canvas.width; slice.height = end - start;
+      const ctx = slice.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, slice.width, slice.height);
+      ctx.drawImage(canvas, 0, start, canvas.width, end - start, 0, 0, canvas.width, end - start);
+      const bin = atob(slice.toDataURL("image/jpeg", 0.95).split(",")[1]);
+      const jpeg = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) jpeg[i] = bin.charCodeAt(i);
+      pages.push({ jpeg, pxW: slice.width, pxH: slice.height, ptW: slice.width * k, ptH: slice.height * k });
+      start = end;
+    }
+    const url = URL.createObjectURL(assemblePdf(pages));
+    const a = document.createElement("a");
+    a.href = url; a.download = `Bolla_Registered_Users_${localDateISO()}.pdf`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  } catch (err) {
+    alert("PDF could not be created: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 /* ---------- Keep data safe ---------- */
@@ -515,30 +589,231 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
 const BACKUP_KEYS = ["lang", "name", "store", "shift", "sheets", "labels"];
-$("backupBtn").addEventListener("click", () => {
-  const data = {};
-  BACKUP_KEYS.forEach(k => { data[k] = load(k, null); });
-  const url = URL.createObjectURL(new Blob([JSON.stringify({ app: "bolla-attendance", version: 1, savedAt: new Date().toISOString(), data }, null, 2)], { type: "application/json" }));
-  const a = document.createElement("a");
-  a.href = url; a.download = `Bolla_Backup_${localDateISO()}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-});
-$("restoreBtn").addEventListener("click", () => $("restoreInput").click());
-$("restoreInput").addEventListener("change", async e => {
-  const file = e.target.files[0];
-  e.target.value = "";
-  if (!file) return;
-  try {
-    const parsed = JSON.parse(await file.text());
-    if (parsed.app !== "bolla-attendance" || typeof parsed.data !== "object") throw new Error("bad");
-    if (!confirm(t("confirmRestore"))) return;
-    BACKUP_KEYS.forEach(k => { if (parsed.data[k] != null) save(k, parsed.data[k]); });
-    location.reload();
-  } catch (_) { alert(t("backupBad")); }
+/* ---------- Accounts: register, login, logout ---------- */
+// Note: this site has no server, so accounts live in this browser only. Passwords are never stored
+// as text (salted PBKDF2 hashes), and each account keeps its own separate data.
+const USERS_KEY = "bolla_users", SESSION_KEY = "bolla_session", LOCK_KEY = "bolla_lock";
+const SESSION_DAYS = 30, MAX_TRIES = 5;
+const textEnc = new TextEncoder();
+const toHex = bytes => [...bytes].map(b => b.toString(16).padStart(2, "0")).join("");
+const fromHex = hex => new Uint8Array((hex.match(/../g) || []).map(h => parseInt(h, 16)));
+const concat = (a, b) => { const o = new Uint8Array(a.length + b.length); o.set(a); o.set(b, a.length); return o; };
+const sameHash = (a, b) => { if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; };
+const hasSubtle = () => !!(window.crypto && window.crypto.subtle);
+const randomHex = n => toHex(crypto.getRandomValues(new Uint8Array(n)));
+
+function rawGet(store, key, fallback) { try { return JSON.parse(store.getItem(key)) ?? fallback; } catch (_) { return fallback; } }
+function rawSet(store, key, value) { try { store.setItem(key, JSON.stringify(value)); return true; } catch (_) { return false; } }
+const getUsers = () => { const u = rawGet(localStorage, USERS_KEY, []); return Array.isArray(u) ? u : []; };
+
+// Plain-JS SHA-256, used only when the page is opened over plain http (no WebCrypto).
+const SHA = (() => {
+  const K = [], H0 = [];
+  for (let c = 2, n = 0; n < 64; c++) {
+    let prime = true;
+    for (let d = 2; d * d <= c; d++) if (c % d === 0) { prime = false; break; }
+    if (!prime) continue;
+    if (n < 8) H0[n] = Math.floor((Math.pow(c, 1 / 2) % 1) * 4294967296) | 0;
+    K[n++] = Math.floor((Math.pow(c, 1 / 3) % 1) * 4294967296) | 0;
+  }
+  return { K, H0 };
+})();
+function sha256(bytes) {
+  const rotr = (x, n) => (x >>> n) | (x << (32 - n));
+  const { K } = SHA, H = SHA.H0.slice();
+  const len = bytes.length, total = ((len + 9 + 63) >> 6) << 6;
+  const buf = new Uint8Array(total);
+  buf.set(bytes); buf[len] = 0x80;
+  const dv = new DataView(buf.buffer);
+  dv.setUint32(total - 8, Math.floor(len / 536870912));
+  dv.setUint32(total - 4, (len * 8) >>> 0);
+  const w = new Int32Array(64);
+  for (let off = 0; off < total; off += 64) {
+    for (let i = 0; i < 16; i++) w[i] = dv.getInt32(off + i * 4);
+    for (let i = 16; i < 64; i++) {
+      const x = w[i - 15], y = w[i - 2];
+      w[i] = (w[i - 16] + (rotr(x, 7) ^ rotr(x, 18) ^ (x >>> 3)) + w[i - 7] + (rotr(y, 17) ^ rotr(y, 19) ^ (y >>> 10))) | 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (h + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    [a, b, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) | 0; });
+  }
+  const out = new Uint8Array(32), o = new DataView(out.buffer);
+  H.forEach((v, i) => o.setInt32(i * 4, v));
+  return out;
+}
+async function hashPassword(password, saltHex, alg) {
+  if (alg === "pbkdf2") {
+    const key = await crypto.subtle.importKey("raw", textEnc.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: fromHex(saltHex), iterations: 150000 }, key, 256);
+    return toHex(new Uint8Array(bits));
+  }
+  const salt = fromHex(saltHex);
+  let h = sha256(concat(salt, textEnc.encode(password)));
+  for (let i = 0; i < 20000; i++) h = sha256(concat(h, salt));
+  return toHex(h);
+}
+
+// The first account on a device adopts any data saved before accounts existed (originals are left untouched).
+function migrateLegacyData(userId) {
+  BACKUP_KEYS.forEach(k => {
+    try {
+      const v = localStorage.getItem(k);
+      if (v !== null && localStorage.getItem(`bolla:${userId}:${k}`) === null) localStorage.setItem(`bolla:${userId}:${k}`, v);
+    } catch (_) {}
+  });
+}
+async function registerUser(name, username, password, mobile) {
+  const users = getUsers();
+  if (users.some(u => u.username === username)) return { ok: false, error: "That email is already registered. Try logging in." };
+  const alg = hasSubtle() ? "pbkdf2" : "sha256x";
+  const salt = randomHex(16);
+  const user = { id: randomHex(6), username, name, mobile, alg, salt, hash: await hashPassword(password, salt, alg), created: new Date().toISOString() };
+  const first = users.length === 0;
+  users.push(user);
+  if (!rawSet(localStorage, USERS_KEY, users)) return { ok: false, error: "This browser is blocking storage (private mode?), so the account could not be saved." };
+  if (first) migrateLegacyData(user.id);
+  return { ok: true, user };
+}
+async function loginUser(username, password) {
+  const locks = rawGet(localStorage, LOCK_KEY, {});
+  const rec = locks[username] || { n: 0, until: 0 };
+  if (rec.until > Date.now()) return { ok: false, error: `Too many attempts. Try again in ${Math.ceil((rec.until - Date.now()) / 1000)} seconds.` };
+  const user = getUsers().find(u => u.username === username);
+  if (user && user.alg === "pbkdf2" && !hasSubtle()) return { ok: false, error: "This account needs a secure page (https or localhost) to sign in." };
+  const hash = await hashPassword(password, user ? user.salt : "00".repeat(16), user ? user.alg : (hasSubtle() ? "pbkdf2" : "sha256x"));
+  if (user && sameHash(hash, user.hash)) {
+    delete locks[username]; rawSet(localStorage, LOCK_KEY, locks);
+    return { ok: true, user };
+  }
+  rec.n += 1;
+  if (rec.n >= MAX_TRIES) rec.until = Date.now() + Math.min(300000, 30000 * 2 ** (rec.n - MAX_TRIES));
+  locks[username] = rec; rawSet(localStorage, LOCK_KEY, locks);
+  return { ok: false, error: "Incorrect username or password." };
+}
+
+function setSession(user, remember) {
+  const rec = { uid: user.id, exp: remember ? Date.now() + SESSION_DAYS * 864e5 : 0 };
+  rawSet(remember ? localStorage : sessionStorage, SESSION_KEY, rec);
+  try { (remember ? sessionStorage : localStorage).removeItem(SESSION_KEY); } catch (_) {}
+}
+function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY); } catch (_) {} }
+function getSessionUser() {
+  for (const store of [sessionStorage, localStorage]) {
+    const rec = rawGet(store, SESSION_KEY, null);
+    if (!rec || !rec.uid) continue;
+    if (rec.exp && rec.exp < Date.now()) { try { store.removeItem(SESSION_KEY); } catch (_) {} continue; }
+    const user = getUsers().find(u => u.id === rec.uid);
+    if (user) return user;
+  }
+  return null;
+}
+
+const PRESENCE_KEY = "bolla_presence", PRESENCE_TTL = 60000;
+let beatTimer = null;
+function beat() {
+  if (!currentUser) return;
+  const p = rawGet(localStorage, PRESENCE_KEY, {});
+  p[currentUser.id] = Date.now();
+  rawSet(localStorage, PRESENCE_KEY, p);
+}
+function leave() {
+  if (!currentUser) return;
+  const p = rawGet(localStorage, PRESENCE_KEY, {});
+  delete p[currentUser.id];
+  rawSet(localStorage, PRESENCE_KEY, p);
+}
+window.addEventListener("pagehide", leave);
+
+function startApp(user) {
+  currentUser = user;
+  NS = `bolla:${user.id}:`;
+  initState();
+  attDate.value = localDateISO();
+  $("userChip").textContent = (user.name || user.username).split(" ")[0];
+  $("logoutTab").title = `${user.name} (${user.username})`;
+  document.body.classList.remove("locked");
+  applyLang();
+  beat();
+  clearInterval(beatTimer);
+  beatTimer = setInterval(() => { beat(); if ($("tab-users").classList.contains("active")) renderUsers(); }, 20000);
+}
+$("logoutTab").addEventListener("click", () => {
+  if (!confirm(t("confirmLogout"))) return;
+  persist(sheet());
+  leave();
+  clearSession();
+  location.reload();
 });
 
-applyLang();
+/* Login / Register screen */
+function setAuthError(id, msg) { const el = $(id); el.textContent = msg; el.hidden = !msg; }
+function showAuthTab(which, focus = true) {
+  const login = which === "login";
+  $("loginForm").hidden = !login; $("registerForm").hidden = login;
+  $("tabLogin").classList.toggle("active", login); $("tabRegister").classList.toggle("active", !login);
+  $("tabLogin").setAttribute("aria-selected", String(login)); $("tabRegister").setAttribute("aria-selected", String(!login));
+  setAuthError("loginError", ""); setAuthError("registerError", "");
+  if (focus) $(login ? "loginUser" : "regName").focus();
+}
+$("tabLogin").addEventListener("click", () => showAuthTab("login"));
+$("tabRegister").addEventListener("click", () => showAuthTab("register"));
+document.querySelectorAll(".show-pass").forEach(btn => btn.addEventListener("click", () => {
+  const input = $(btn.dataset.target), show = input.type === "password";
+  input.type = show ? "text" : "password";
+  btn.textContent = show ? "Hide" : "Show";
+  btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+}));
+
+async function runAuth(form, errorId, busyText, idleText, work) {
+  const btn = form.querySelector(".auth-submit");
+  setAuthError(errorId, "");
+  btn.disabled = true; btn.textContent = busyText;
+  try { await work(); }
+  catch (err) { setAuthError(errorId, "Something went wrong. Please try again."); }
+  finally { btn.disabled = false; btn.textContent = idleText; }
+}
+$("loginForm").addEventListener("submit", e => {
+  e.preventDefault();
+  runAuth(e.target, "loginError", "Signing in…", "Login", async () => {
+    const username = $("loginUser").value.trim().toLowerCase(), password = $("loginPass").value;
+    if (!username || !password) return setAuthError("loginError", "Enter your email and password.");
+    const res = await loginUser(username, password);
+    if (!res.ok) return setAuthError("loginError", res.error);
+    setSession(res.user, $("loginRemember").checked);
+    $("loginPass").value = "";
+    startApp(res.user);
+  });
+});
+$("registerForm").addEventListener("submit", e => {
+  e.preventDefault();
+  runAuth(e.target, "registerError", "Creating account…", "Create account", async () => {
+    const name = $("regName").value.trim().replace(/\s+/g, " "), username = $("regUser").value.trim().toLowerCase();
+    const pass = $("regPass").value, pass2 = $("regPass2").value;
+    const mobile = $("regMobile").value.trim().replace(/\s+/g, " "), digits = mobile.replace(/\D/g, "");
+    if (name.length < 2 || name.length > 50) return setAuthError("registerError", "Enter your full name (2–50 characters).");
+    if (!/^\+?[0-9 ()-]{7,20}$/.test(mobile) || digits.length < 7 || digits.length > 15) return setAuthError("registerError", "Enter a valid mobile number, like +1 917 435 2695.");
+    if (username.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(username)) return setAuthError("registerError", "Enter a valid email address, like name@example.com.");
+    if (pass.length < 8 || !/[A-Za-z]/.test(pass) || !/\d/.test(pass)) return setAuthError("registerError", "Password needs at least 8 characters, with a letter and a number.");
+    if (pass !== pass2) return setAuthError("registerError", "Passwords do not match.");
+    const res = await registerUser(name, username, pass, mobile);
+    if (!res.ok) return setAuthError("registerError", res.error);
+    setSession(res.user, true);
+    $("regPass").value = ""; $("regPass2").value = "";
+    startApp(res.user);
+  });
+});
+
+// Start: signed-in users go straight in, everyone else sees the login (or first-time register) screen.
+(function boot() {
+  const user = getSessionUser();
+  if (user) { startApp(user); return; }
+  showAuthTab(getUsers().length ? "login" : "register", false);
+})();
 
 // Footer year stays current automatically.
 const yearEl = document.getElementById("year");
