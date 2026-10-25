@@ -7,7 +7,7 @@ const STAFF = [
 ];
 // Name dropdown shows names A to Z.
 const STAFF_SORTED = [...STAFF].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
-const STORES = ["3239", "3240", "3241", "3242", "3243"]; // replace with your real store numbers
+const STORES = ["3239", "3309", "109", "2300", "170","211","236","400","450","525","540","542","750","1050","1490"].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));   // Store dropdown: smallest number first
 const SHIFTS = ["day", "afternoon", "night"];
 const ADDRESS = "Sunrise Hwy, Islip Terrace, NY 11752";
 
