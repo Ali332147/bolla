@@ -13,7 +13,7 @@ const ADDRESS = "Sunrise Hwy, Islip Terrace, NY 11752";
 
 /* ---------- Translations ---------- */
 const T = {
-  en: { name:"Name", store:"Store", report:"Report", upload:"Upload", allNames:"All names", day:"Day", afternoon:"Afternoon", night:"Night",
+  en: { name:"Name", store:"Store", report:"Report", upload:"Upload", allNames:"All names", day:"Morning", afternoon:"Afternoon", night:"Night",
     date:"Date:", status:"Status", checkIn:"Check-in", saveHint:"Saved automatically in this browser.",
     present:"Present", late:"Late", absent:"Absent", excel:"Download Excel", print:"Print",
     choose:"Choose files or drag them here", anyType:"Multiple files · Any file type", note:"Note (optional)",
@@ -89,6 +89,14 @@ const BACKUP = {
 Object.keys(BACKUP).forEach(l => Object.assign(EXTRA[l], BACKUP[l]));
 Object.keys(PNG_LABEL).forEach(l => { EXTRA[l].png = PNG_LABEL[l]; EXTRA[l].pdf = PNG_LABEL[l]; });
 Object.keys(LABELS2).forEach(l => Object.assign(EXTRA[l], LABELS2[l]));
+const RPT_LABELS = {
+  en: { addRow:"+ Add row", rptSub:"Attendance & Shift Report", rptPrepared:"Prepared by", rptVerified:"Verified by" },
+  es: { addRow:"+ Añadir fila", rptSub:"Informe de asistencia y turnos", rptPrepared:"Preparado por", rptVerified:"Verificado por" },
+  hi: { addRow:"+ पंक्ति जोड़ें", rptSub:"उपस्थिति और शिफ्ट रिपोर्ट", rptPrepared:"तैयार करने वाले", rptVerified:"सत्यापित करने वाले" },
+  ur: { addRow:"+ قطار شامل کریں", rptSub:"حاضری اور شفٹ رپورٹ", rptPrepared:"تیار کنندہ", rptVerified:"تصدیق کنندہ" },
+  bn: { addRow:"+ সারি যোগ করুন", rptSub:"উপস্থিতি ও শিফট রিপোর্ট", rptPrepared:"প্রস্তুতকারী", rptVerified:"যাচাইকারী" }
+};
+Object.keys(RPT_LABELS).forEach(l => Object.assign(EXTRA[l], RPT_LABELS[l]));
 Object.keys(EXTRA).forEach(l => Object.assign(T[l], EXTRA[l]));
 
 /* ---------- Helpers ---------- */
@@ -122,10 +130,10 @@ attDate.value = localDateISO();
 const t = key => (T[lang] && T[lang][key]) || T.en[key] || key;
 const lbl = key => labels[`${lang}:${key}`] ?? t(key);
 
-const ROWS = 17;                        // 16 numbered rows + 1 spare row, like the paper
+const ROWS = 5;                         // sheets start with 5 rows; the Add button appends more
 const sheetKey = () => `${attDate.value}|${selStore}|${selName}`;   // sheet = date + store + name
 const blankSheet = () => ({
-  rows: Array.from({ length: ROWS }, (_, i) => ({ serial: i < 16 ? String(i + 1) : "", amount: "", day: "", time: "", name: "" })),
+  rows: Array.from({ length: ROWS }, (_, i) => ({ serial: String(i + 1), amount: "", day: "", time: "", name: "" })),
   bk: "0", refund: "0", total: "0.00", grand: "0.00", nb: "", att: ""
 });
 const sheet = () => sheets[sheetKey()] || (sheets[sheetKey()] = blankSheet());
@@ -307,6 +315,17 @@ document.addEventListener("input", e => {
 });
 document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("[contenteditable]")) { e.preventDefault(); e.target.blur(); } });
 
+/* Add button: appends the next numbered row to this sheet */
+$("addRowBtn").addEventListener("click", () => {
+  const s = sheet();
+  s.rows.push({ serial: String(s.rows.length + 1), amount: "", day: "", time: "", name: "" });
+  save("sheets", sheets);
+  renderAll();
+  const inputs = document.querySelectorAll("#entryRows .amount");
+  const last = inputs[inputs.length - 1];
+  if (last) { last.scrollIntoView({ block: "center", behavior: "smooth" }); last.focus({ preventScroll: true }); }
+});
+
 $("clearBtn").addEventListener("click", () => {
   if (!confirm(t("confirmClear"))) return;
   const keepNote = sheet().nb, keepAtt = sheet().att;   // Clear Entries keeps your N.B notes and attendance mark
@@ -317,8 +336,59 @@ $("clearBtn").addEventListener("click", () => {
   renderAll();
 });
 
+/* ---------- Professional report mode (used by Print and Download PDF) ---------- */
+const niceDate = iso => {
+  const [y, m, d] = (iso || "").split("-").map(Number);
+  if (!y) return iso || "";
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+function enterReportMode() {
+  const tab = $("tab-main");
+  tab.classList.add("rpt-mode");
+  document.documentElement.classList.add("rpt-print");
+  $("rptTitle").textContent = ($("marqueeText").textContent || "Bolla Market").trim();
+  // Readable date ("Oct 25, 2026") instead of the browser's date input
+  const pd = tab.querySelector(".paper-date");
+  pd.querySelector(".rpt-date-text")?.remove();
+  const dt = document.createElement("span");
+  dt.className = "rpt-date-text"; dt.textContent = niceDate($("attDate").value);
+  pd.appendChild(dt);
+  // Plain-text cells (S.No, Shift, Time as "2:48 AM") so print and PDF render identically
+  tab.querySelectorAll("#entryRows tr").forEach(tr => {
+    tr.querySelectorAll(".rpt-cell-text").forEach(n => n.remove());
+    [".serial", ".day", ".time"].forEach(sel => {
+      const input = tr.querySelector(sel); if (!input) return;
+      let v = input.value || "";
+      if (sel === ".time" && /^\d{1,2}:\d{2}/.test(v)) {
+        const [hh, mm] = v.split(":").map(Number);
+        v = `${hh % 12 || 12}:${String(mm).padStart(2, "0")} ${hh < 12 ? "AM" : "PM"}`;
+      }
+      const span = document.createElement("span");
+      span.className = "rpt-cell-text"; span.textContent = v;
+      input.after(span);
+    });
+  });
+  document.activeElement?.blur?.();
+  // Hide the Attendance item when no status is chosen
+  const attBox = $("sheetAtt").parentElement;
+  if (attBox) attBox.dataset.empty = sheet().att ? "no" : "yes";
+  const now = new Date();
+  $("rptStamp").textContent = "Printed " + now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) +
+    ", " + now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+function leaveReportMode() {
+  const tab = $("tab-main");
+  tab.classList.remove("rpt-mode");
+  document.documentElement.classList.remove("rpt-print");
+  tab.querySelector(".rpt-date-text")?.remove();
+  tab.querySelectorAll(".rpt-cell-text").forEach(n => n.remove());
+  const attBox = $("sheetAtt").parentElement;
+  if (attBox) delete attBox.dataset.empty;
+}
+
 /* Print-safe text values: some browsers clip number inputs in print preview. */
 window.addEventListener("beforeprint", () => {
+  enterReportMode();
   $("nbBox").dataset.empty = $("nbText").value.trim() ? "no" : "yes";
   document.querySelectorAll("#entryRows tr").forEach(tr => {
     const amount = tr.querySelector(".amount");
@@ -339,6 +409,7 @@ window.addEventListener("beforeprint", () => {
   });
 });
 window.addEventListener("afterprint", () => {
+  leaveReportMode();
   delete $("nbBox").dataset.empty;
   document.querySelectorAll("#entryRows tr").forEach(tr => {
     tr.dataset.print = "yes";
@@ -391,9 +462,19 @@ $("pngBtn").addEventListener("click", async () => {
   const btn = $("pngBtn");
   if (typeof html2canvas !== "function") { alert("html2canvas.min.js must be in the same folder as index.html."); return; }
   btn.disabled = true;
+  // Cover the page while the report layout is applied, so nothing visibly jumps.
+  const cover = document.createElement("div");
+  cover.className = "no-print";
+  cover.style.cssText = "position:fixed;inset:0;z-index:99999;background:#fff;display:grid;place-items:center;font:700 16px Arial,sans-serif;color:#174b30";
+  cover.textContent = "Creating PDF…";
+  document.body.appendChild(cover);
+  const tabEl = $("tab-main");
+  enterReportMode();
+  tabEl.style.cssText += ";width:760px;max-width:none;flex:none;min-height:980px";
   try {
-    const canvas = await html2canvas($("tab-main"), {
-      scale: 2, backgroundColor: "#ffffff", useCORS: true,
+    await new Promise(r => setTimeout(r, 60));   // let the browser lay out the report view
+    const canvas = await html2canvas(tabEl, {
+      scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: 1200,
       onclone: doc => {
         // Force the text watermark into the cloned export DOM so it appears in PDF too.
         const watermark = doc.querySelector("#tab-main > .report-watermark");
@@ -403,12 +484,13 @@ $("pngBtn").addEventListener("click", async () => {
             display: "block", position: "absolute", top: "43%", left: "0", width: "100%",
             textAlign: "center", whiteSpace: "nowrap", overflow: "visible",
             color: "#d94a55", opacity: "0.075", fontFamily: 'Georgia, "Times New Roman", serif',
-            fontWeight: "800", fontSize: "11vw", lineHeight: "1", letterSpacing: "-0.04em",
+            fontWeight: "800", lineHeight: "1", letterSpacing: "-0.04em",
             transform: "rotate(-16deg)", transformOrigin: "center", zIndex: "0", pointerEvents: "none"
           });
         }
         // Opaque white table cells would cover the watermark in html2canvas.
-        doc.querySelectorAll("#tab-main .form-table, #tab-main .form-table tbody, #tab-main .form-table tr, #tab-main .form-table td, #tab-main .form-table tbody tr:nth-child(even) td, #tab-main .totals, #tab-main .total-line").forEach(el => {
+        doc.querySelectorAll("#tab-main .form-table, #tab-main .form-table tbody, #tab-main .form-table tr, #tab-main .form-table td, #tab-main .form-table tbody tr:nth-child(even) td").forEach(el => {
+          if (el.matches("tbody tr:nth-child(even) td")) return;   // keep the light zebra tint
           el.style.setProperty("background", "transparent", "important");
           el.style.setProperty("background-color", "transparent", "important");
         });
@@ -444,13 +526,6 @@ $("pngBtn").addEventListener("click", async () => {
           value.textContent = input.value;
           input.replaceWith(value);
         });
-        const dateInput = doc.getElementById("attDate");
-        if (dateInput) {
-          const dateText = doc.createElement("span");
-          dateText.className = "date-export";
-          dateText.textContent = dateInput.value;
-          dateInput.replaceWith(dateText);
-        }
       },
       ignoreElements: el => el.classList && el.classList.contains("no-print")
     });
@@ -463,6 +538,9 @@ $("pngBtn").addEventListener("click", async () => {
   } catch (err) {
     alert("PDF could not be created: " + err.message);
   } finally {
+    tabEl.style.width = tabEl.style.maxWidth = tabEl.style.flex = tabEl.style.minHeight = "";
+    leaveReportMode();
+    cover.remove();
     btn.disabled = false;
   }
 });
