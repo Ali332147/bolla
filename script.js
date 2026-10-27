@@ -3,7 +3,7 @@ const STAFF = [
   "Jaber Ali", "Aman", "Jafor", "Mohammed", "Sazzad",
   "Farid", "Raja", "Ihsan", "Rahim", "Karim",
   "Hasan", "Rubel", "Sohel", "Nayeem", "Rafi",
-  "Imran", "Mizan", "Salman", "Arif", "Shakil"
+  "Imran", "Mizan", "Salman", "Arif", "Shakil", "Nasir"
 ];
 // Name dropdown shows names A to Z.
 const STAFF_SORTED = [...STAFF].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));

@@ -639,3 +639,44 @@ body.locked .auth-screen { display: flex; }
 .add-row-btn { display: block; width: 100%; min-height: 44px; border: 2px dashed #7fa38b; border-radius: 8px; background: var(--green-light); color: var(--green-dark); font-size: 16px; font-weight: 700; cursor: pointer; }
 .add-row-btn:hover { background: #d9eadf; border-color: var(--green); filter: none; }
 .add-row-btn:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+
+/* Print report header: keep the Bolla logo left, title centered, QR right. */
+#tab-main.rpt-mode .rpt-head {
+  display: flex !important;
+  position: relative;
+  min-height: 82px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 88px 8px 88px;
+  margin: 0 0 12px;
+  border-top: 4px solid #174b30;
+  border-bottom: 1px solid #d4a24a;
+}
+#tab-main.rpt-mode .rpt-head .rpt-logo {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+}
+#tab-main.rpt-mode .rpt-head .rpt-titles {
+  text-align: center;
+  min-width: 0;
+}
+#tab-main.rpt-mode .rpt-head .rpt-qr {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: #fff;
+}
+@media print {
+  #tab-main.rpt-mode .rpt-head { break-inside: avoid; }
+  #tab-main.rpt-mode .rpt-head .rpt-qr { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
