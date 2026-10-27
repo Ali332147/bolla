@@ -57,11 +57,12 @@
   <header class="topbar no-print">
     <a class="logo" href="#" aria-label="Bolla Market"><img src="logo.png" alt="Bolla Market"></a>
     <nav class="menu" aria-label="Main menu">
-      <div class="dd" id="ddName"></div>
       <div class="dd" id="ddStore"></div>
       <div class="dd" id="ddReport"></div>
       <div class="dd" id="ddPresent"></div>
-      <button class="tab" id="logoutTab" type="button"><span data-i18n="logout">Logout</span><small id="userChip"></small></button>
+      <button class="tab" id="adminTab" type="button" hidden>Admin Control Panel</button>
+      <button class="tab" id="registeredListTab" type="button" hidden>Registered List</button>
+      <button class="tab" id="logoutTab" type="button"><span data-i18n="logout">Logout</span></button>
     </nav>
     <select id="lang" aria-label="Language">
       <option value="en">English</option>
@@ -88,12 +89,12 @@
           <div class="rpt-title" id="rptTitle">Bolla Market</div>
           <div class="rpt-sub" data-i18n="rptSub">Attendance &amp; Shift Report</div>
         </div>
-        <img class="rpt-qr" src="qr-code.png" alt="Employee profile QR code">
+        <a class="rpt-qr-link" href="https://ali332147.github.io/bollaempcard/" target="_blank" rel="noopener noreferrer" aria-label="Open Bolla Employee Card main site"><img class="rpt-qr" src="qr-code.png" alt="QR code — scan to open Bolla Employee Card main site"><span class="rpt-qr-link-label">Click to open main site</span></a>
       </header>
       <div class="marquee"><h2 class="paper-heading" id="marqueeText" data-i18n="Bolla Market" contenteditable="true" spellcheck="false">Bolla Market</h2></div>
       <div class="report-meta-row">
         <div class="global-search no-print" role="search">
-          <input id="globalSearch" type="search" placeholder="Search name or store..." aria-label="Search name or store" autocomplete="off">
+          <input id="globalSearch" type="search" placeholder="Search store..." aria-label="Search name or store" autocomplete="off">
           <div id="globalSearchResults" class="global-search-results" hidden></div>
         </div>
         <div class="report-meta-details">
@@ -148,7 +149,7 @@
 
     <!-- Registered users: Active = signed in now, Inactive = signed out -->
     <section class="panel" id="tab-users">
-      <h2 class="users-title" data-i18n="regTitle">Registered Users</h2>
+      <h2 class="users-title" data-i18n="regTitle">Admin Registered List</h2>
       <p class="users-meta"><span data-i18n="date">Date:</span> <b id="usersDate"></b> &nbsp;·&nbsp; <span id="usersCounts"></span></p>
       <div class="table-wrap">
         <table class="form-table users-table" aria-label="Registered users">
@@ -156,8 +157,10 @@
             <th data-i18n="sno">S.No</th>
             <th data-i18n="name">Name</th>
             <th data-i18n="mobile">Mobile number</th>
+            <th>Store</th>
             <th data-i18n="email">Email</th>
             <th data-i18n="status">Status</th>
+            <th>Role</th><th>Admin actions</th>
           </tr></thead>
           <tbody id="usersRows"></tbody>
         </table>
@@ -169,6 +172,25 @@
       </div>
       <p class="hint no-print">Shows accounts registered on this device. Active = signed in right now.</p>
       <p class="print-footer">Bolla | Attendance | Ihsan (TM)</p>
+    </section>
+
+    <section class="panel" id="tab-admin">
+      <h2 class="users-title">Admin Control Panel</h2>
+      <p class="hint">Admin only: edit or delete staff names and manage registered accounts.</p>
+      <div class="admin-card">
+        <h3>Manage Name List</h3>
+        <div class="admin-add-row"><input id="adminNewStaff" type="text" maxlength="60" placeholder="New staff name"><button id="adminAddStaff" type="button">Add Name</button></div>
+        <label class="admin-search-label" for="adminStaffSearch">Search name list</label>
+        <input id="adminStaffSearch" class="admin-search" type="search" placeholder="Search staff name..." autocomplete="off">
+        <div id="adminStaffList" class="admin-staff-list"></div>
+      </div>
+      <div class="admin-card">
+        <h3>Registered Accounts</h3>
+        <p id="adminUserCount"></p>
+        <button id="adminUsers" type="button">Open Registered List</button>
+      </div>
+      <div class="actions no-print"><button class="secondary" id="adminBack" type="button">Back to Report</button></div>
+      <p class="hint">Important: this version stores accounts and roles in this browser only. It is not secure against a user who edits browser storage or JavaScript.</p>
     </section>
   </main>
   <footer class="site-footer no-print">

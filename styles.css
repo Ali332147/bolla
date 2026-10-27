@@ -680,3 +680,252 @@ body.locked .auth-screen { display: flex; }
   #tab-main.rpt-mode .rpt-head { break-inside: avoid; }
   #tab-main.rpt-mode .rpt-head .rpt-qr { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
+
+/* Clickable print QR: keeps the QR image itself unchanged for camera scanning. */
+.rpt-head .rpt-qr-link {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 78px;
+  color: #174b30;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  z-index: 2;
+}
+.rpt-head .rpt-qr-link .rpt-qr {
+  position: static;
+  display: block;
+  width: 70px;
+  height: 70px;
+  transform: none;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: #fff;
+}
+.rpt-qr-link-label {
+  display: none;
+  max-width: 78px;
+  font: 700 7px Arial, sans-serif;
+  line-height: 1.1;
+  text-align: center;
+  color: #174b30;
+}
+@media print {
+  .rpt-head .rpt-qr-link { text-decoration: none; }
+  .rpt-qr-link-label { display: block; }
+}
+
+
+/* Admin controls */
+.admin-card { margin: 18px 0; padding: 16px; border: 1px solid #d5e1d8; border-radius: 10px; background: #fbfdfb; }
+.admin-card h3 { margin: 0 0 12px; color: var(--green-dark); }
+.admin-add-row, .admin-staff-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.admin-add-row input, .admin-staff-row input { flex: 1; min-width: 0; }
+.admin-staff-row { padding: 8px; border: 1px solid #e1e8e3; border-radius: 8px; background: white; }
+.admin-small { min-height: 32px; padding: 5px 8px; margin: 2px; font-size: 12px; }
+#tab-users .users-table { min-width: 1100px; table-layout: fixed; }
+#tab-users .users-table th:nth-child(1), #tab-users .users-table td:nth-child(1) { width: 60px; }
+#tab-users .users-table th:nth-child(2), #tab-users .users-table td:nth-child(2) { width: 180px; }
+#tab-users .users-table th:nth-child(3), #tab-users .users-table td:nth-child(3) { width: 170px; }
+#tab-users .users-table th:nth-child(4), #tab-users .users-table td:nth-child(4) { width: 120px; }
+#tab-users .users-table th:nth-child(5), #tab-users .users-table td:nth-child(5) { width: 260px; }
+#tab-users .users-table th:nth-child(6), #tab-users .users-table td:nth-child(6) { width: 100px; }
+#tab-users .users-table th:nth-child(7), #tab-users .users-table td:nth-child(7) { width: 80px; }
+#tab-users .users-table th:nth-child(8), #tab-users .users-table td:nth-child(8) { width: 190px; }
+#tab-users .users-table td { height: auto; vertical-align: middle; overflow-wrap: normal; word-break: normal; }
+#tab-users .users-table td:last-child { white-space: nowrap; }
+#tab-users .users-table td:last-child button { display: inline-block; min-width: 54px; width: auto; margin: 2px; white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+#tab-admin[hidden], #adminTab[hidden] { display: none !important; }
+@media (max-width: 760px) { .admin-add-row, .admin-staff-row { flex-wrap: wrap; } .admin-staff-row input { flex-basis: 100%; } }
+
+@media print { .row-actions-col { display: none !important; } }
+/* Registered users table: keep admin controls readable instead of breaking every word */
+#tab-users .table-wrap { overflow-x: auto; }
+#tab-users .users-table button { line-height: 1.2; }
+
+/* Admin control panel: searchable names and responsive action buttons */
+.admin-search-label { display:block; margin: 14px 0 6px; color: var(--green-dark); font-weight:700; }
+.admin-search { display:block; width:100%; min-height:44px; margin:0 0 12px; padding:10px 12px; border:1px solid #b7c2ba; border-radius:7px; background:#fff; }
+.admin-staff-list { min-width:0; }
+.admin-staff-row { min-width:0; }
+#tab-users .users-table td:last-child { white-space:normal; }
+#tab-users .users-table td:last-child { display:table-cell; }
+#tab-users .users-table td:last-child button { white-space:nowrap; max-width:100%; }
+@media (max-width:760px) {
+  #tab-admin { min-width:0; }
+  #tab-admin .admin-card { padding:12px; }
+  #tab-admin .admin-add-row { display:flex; flex-wrap:wrap; }
+  #tab-admin .admin-add-row input { flex:1 1 180px; width:100%; }
+  #tab-admin .admin-add-row button { flex:0 0 auto; }
+  #tab-admin .admin-staff-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:6px; padding:7px; }
+  #tab-admin .admin-staff-row input { grid-column:1/-1; width:100%; }
+  #tab-admin .admin-staff-row button { min-width:64px; padding:8px 10px; }
+  #tab-users .table-wrap { max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  #tab-users .users-table { min-width:1100px; table-layout:fixed; }
+  #tab-users .users-table th:last-child, #tab-users .users-table td:last-child { width:180px; }
+  #tab-users .users-table td:last-child button { margin:3px; min-width:62px; }
+}
+
+/* Registered Users print: print only this panel, not the main report. */
+@media print {
+  body.print-users-only .topbar, body.print-users-only #tab-main, body.print-users-only #tab-admin, body.print-users-only #tab-auth, body.print-users-only .no-print { display:none !important; }
+  body.print-users-only #tab-users { display:block !important; position:static !important; width:100% !important; margin:0 !important; padding:0 !important; box-shadow:none !important; overflow:visible !important; }
+  body.print-users-only #tab-users .table-wrap { overflow:visible !important; }
+  body.print-users-only #tab-users .users-table { width:100% !important; min-width:0 !important; table-layout:auto !important; font-size:9pt !important; }
+  body.print-users-only #tab-users .users-table th, body.print-users-only #tab-users .users-table td { padding:5px 4px !important; overflow-wrap:anywhere !important; word-break:normal !important; border:1px solid #222 !important; color:#000 !important; }
+  body.print-users-only #tab-users .users-table td:last-child { display:none !important; }
+  body.print-users-only #tab-users .print-footer { display:block !important; }
+  @page { size: landscape; margin: 0.35in; }
+}
+
+
+/* Employee profile links: only exact profile matches are clickable. */
+.employee-profile-link { color: #175aa6; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; cursor: pointer; font-weight: 700; }
+.employee-profile-link:hover, .employee-profile-link:focus-visible { color: #0d3d76; text-decoration-thickness: 2px; outline-offset: 2px; }
+@media print { .employee-profile-link { color: #000 !important; text-decoration: none !important; } }
+
+/* Admin name list: clickable matching employee profile link */
+.admin-profile-link { display: inline-flex; align-items: center; flex: 0 0 auto; padding: 6px 9px; border-radius: 6px; background: #e8f2eb; color: #174b30; font-weight: 700; text-decoration: underline; white-space: nowrap; }
+.admin-staff-row { min-width: 0; }
+.admin-staff-row input { min-width: 0; flex: 1 1 120px; }
+.admin-staff-row button { flex: 0 0 auto; white-space: nowrap; }
+@media (max-width: 560px) { .admin-staff-row { flex-wrap: wrap; gap: 7px; } .admin-profile-link { max-width: 100%; } .admin-staff-row input { flex: 1 1 100%; width: 100%; } .admin-staff-row button { flex: 1 1 80px; } }
+
+
+/* Registered Users: mobile card layout so every field is visible without horizontal clipping. */
+#tab-users { min-width: 0; width: 100%; }
+#tab-users .users-title { text-align: center; font-size: clamp(20px, 5vw, 28px); overflow-wrap: anywhere; }
+#tab-users .users-meta { text-align: center; line-height: 1.6; padding: 0 4px; overflow-wrap: anywhere; }
+#tab-users .table-wrap { width: 100%; max-width: 100%; min-width: 0; }
+#tab-users .users-table { width: 100%; }
+@media screen and (max-width: 760px) {
+  #tab-users { width: 100%; max-width: 100%; padding: 12px !important; margin: 10px auto !important; overflow: hidden; }
+  #tab-users .users-title { margin: 0 0 8px; }
+  #tab-users .users-meta { font-size: 13px; margin: 0 0 14px; }
+  #tab-users .table-wrap { overflow: visible !important; }
+  #tab-users .users-table, #tab-users .users-table tbody { display: block; width: 100% !important; min-width: 0 !important; table-layout: auto !important; }
+  #tab-users .users-table thead { display: none !important; }
+  #tab-users .users-table tbody tr { display: block; width: 100%; min-width: 0; margin: 0 0 12px; padding: 8px 10px; border: 1px solid #aebbb2; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px #0000000d; }
+  #tab-users .users-table tbody td { display: grid !important; grid-template-columns: minmax(92px, 38%) minmax(0, 1fr); align-items: start; gap: 8px; width: 100% !important; min-width: 0 !important; height: auto !important; padding: 8px 2px !important; border: 0 !important; border-bottom: 1px solid #e6ebe7 !important; text-align: left !important; white-space: normal !important; overflow-wrap: anywhere !important; word-break: break-word !important; font-size: 13px; }
+  #tab-users .users-table tbody td:last-child { border-bottom: 0 !important; }
+  #tab-users .users-table tbody td::before { content: attr(data-label); color: #174b30; font-weight: 700; overflow-wrap: anywhere; }
+  #tab-users .users-table td button { display: inline-flex !important; align-items: center; justify-content: center; min-width: 0 !important; max-width: 100%; margin: 2px !important; padding: 8px 9px !important; white-space: normal !important; overflow-wrap: normal !important; word-break: normal !important; font-size: 12px; }
+  #tab-users .users-table td[data-label="Admin actions"] { display: flex !important; flex-wrap: wrap; align-items: center; gap: 5px; }
+  #tab-users .users-table td[data-label="Admin actions"]::before { flex: 0 0 100%; }
+  #tab-users .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  #tab-users .actions button { flex: 1 1 110px; min-width: 0; }
+}
+@media print {
+  #tab-users .users-table { display: table !important; }
+  #tab-users .users-table tbody { display: table-row-group !important; }
+  #tab-users .users-table tbody tr { display: table-row !important; box-shadow: none !important; }
+  #tab-users .users-table tbody td { display: table-cell !important; }
+  #tab-users .users-table tbody td::before { content: none !important; }
+}
+
+/* FINAL FIX: Registered Users mobile view - never clip columns/actions */
+@media screen and (max-width: 760px) {
+  #tab-users { box-sizing:border-box !important; overflow:visible !important; }
+  #tab-users .table-wrap { overflow:visible !important; }
+  #tab-users .users-table { display:block !important; width:100% !important; min-width:0 !important; table-layout:auto !important; border:0 !important; }
+  #tab-users .users-table thead { display:none !important; }
+  #tab-users .users-table tbody { display:block !important; width:100% !important; }
+  #tab-users .users-table tbody tr { display:block !important; width:100% !important; box-sizing:border-box !important; margin:0 0 12px !important; padding:8px 10px !important; border:1px solid #aebbb2 !important; border-radius:10px !important; background:#fff !important; }
+  #tab-users .users-table tbody td { display:grid !important; grid-template-columns:minmax(100px, 36%) minmax(0,1fr) !important; gap:8px !important; align-items:start !important; box-sizing:border-box !important; width:100% !important; min-width:0 !important; height:auto !important; padding:8px 2px !important; border:0 !important; border-bottom:1px solid #e6ebe7 !important; text-align:left !important; white-space:normal !important; overflow-wrap:anywhere !important; word-break:break-word !important; }
+  #tab-users .users-table tbody td:nth-child(1)::before { content:"S.No"; }
+  #tab-users .users-table tbody td:nth-child(2)::before { content:"Name"; }
+  #tab-users .users-table tbody td:nth-child(3)::before { content:"Mobile number"; }
+  #tab-users .users-table tbody td:nth-child(4)::before { content:"Store"; }
+  #tab-users .users-table tbody td:nth-child(5)::before { content:"Email"; }
+  #tab-users .users-table tbody td:nth-child(6)::before { content:"Status"; }
+  #tab-users .users-table tbody td:nth-child(7)::before { content:"Role"; }
+  #tab-users .users-table tbody td:nth-child(8)::before { content:"Admin actions"; }
+  #tab-users .users-table tbody td::before { display:block !important; color:#174b30 !important; font-weight:700 !important; min-width:0 !important; overflow-wrap:anywhere !important; }
+  #tab-users .users-table tbody td:last-child { display:flex !important; flex-wrap:wrap !important; gap:6px !important; border-bottom:0 !important; }
+  #tab-users .users-table tbody td:last-child::before { flex:0 0 100% !important; }
+  #tab-users .users-table tbody td button { flex:1 1 76px !important; width:auto !important; min-width:0 !important; max-width:100% !important; white-space:normal !important; overflow-wrap:normal !important; word-break:normal !important; line-height:1.2 !important; }
+  #tab-users .actions { display:flex !important; flex-wrap:wrap !important; gap:8px !important; }
+  #tab-users .actions button { flex:1 1 105px !important; min-width:0 !important; }
+}
+@media print {
+  #tab-users .users-table { display:table !important; width:100% !important; }
+  #tab-users .users-table thead { display:table-header-group !important; }
+  #tab-users .users-table tbody { display:table-row-group !important; }
+  #tab-users .users-table tbody tr { display:table-row !important; }
+  #tab-users .users-table tbody td { display:table-cell !important; }
+  #tab-users .users-table tbody td::before { content:none !important; display:none !important; }
+}
+
+
+/* HARD FIX: Registered Users panel must never clip on phone/tablet widths */
+@media screen and (max-width: 1100px) {
+  html, body { max-width:100%; overflow-x:hidden !important; }
+  .sheet, #tab-users, #tab-users.panel, #tab-users.active { width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; }
+  .sheet { padding-left:clamp(8px, 2.5vw, 16px) !important; padding-right:clamp(8px, 2.5vw, 16px) !important; }
+  #tab-users { padding:10px !important; margin:0 !important; overflow:visible !important; }
+  #tab-users .users-title, #tab-users .users-meta { max-width:100% !important; overflow-wrap:anywhere !important; }
+  #tab-users .table-wrap { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; overflow:visible !important; }
+  #tab-users .users-table { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; table-layout:auto !important; border:0 !important; }
+  #tab-users .users-table thead { display:none !important; }
+  #tab-users .users-table tbody { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; }
+  #tab-users .users-table tbody tr { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; margin:0 0 12px !important; padding:8px 10px !important; border:1px solid #aebbb2 !important; border-radius:10px !important; background:#fff !important; overflow:hidden !important; }
+  #tab-users .users-table tbody td { display:grid !important; grid-template-columns:minmax(88px, 34%) minmax(0, 1fr) !important; align-items:start !important; gap:8px !important; width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; height:auto !important; padding:8px 2px !important; border:0 !important; border-bottom:1px solid #e6ebe7 !important; text-align:left !important; white-space:normal !important; overflow-wrap:anywhere !important; word-break:break-word !important; font-size:13px !important; }
+  #tab-users .users-table tbody td:nth-child(1)::before { content:"S.No"; }
+  #tab-users .users-table tbody td:nth-child(2)::before { content:"Name"; }
+  #tab-users .users-table tbody td:nth-child(3)::before { content:"Mobile number"; }
+  #tab-users .users-table tbody td:nth-child(4)::before { content:"Store"; }
+  #tab-users .users-table tbody td:nth-child(5)::before { content:"Email"; }
+  #tab-users .users-table tbody td:nth-child(6)::before { content:"Status"; }
+  #tab-users .users-table tbody td:nth-child(7)::before { content:"Role"; }
+  #tab-users .users-table tbody td:nth-child(8)::before { content:"Admin actions"; }
+  #tab-users .users-table tbody td::before { display:block !important; min-width:0 !important; color:#174b30 !important; font-weight:700 !important; white-space:normal !important; overflow-wrap:anywhere !important; }
+  #tab-users .users-table tbody td:last-child { display:flex !important; flex-wrap:wrap !important; align-items:center !important; gap:6px !important; border-bottom:0 !important; }
+  #tab-users .users-table tbody td:last-child::before { flex:0 0 100% !important; }
+  #tab-users .users-table tbody td button { display:inline-flex !important; flex:1 1 90px !important; width:auto !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; justify-content:center !important; white-space:normal !important; overflow-wrap:anywhere !important; word-break:normal !important; line-height:1.25 !important; padding:8px 7px !important; margin:0 !important; }
+  #tab-users .actions { display:flex !important; flex-wrap:wrap !important; gap:8px !important; width:100% !important; }
+  #tab-users .actions button { flex:1 1 100px !important; min-width:0 !important; max-width:100% !important; }
+}
+@media print {
+  #tab-users .users-table { display:table !important; width:100% !important; max-width:100% !important; }
+  #tab-users .users-table thead { display:table-header-group !important; }
+  #tab-users .users-table tbody { display:table-row-group !important; }
+  #tab-users .users-table tbody tr { display:table-row !important; }
+  #tab-users .users-table tbody td { display:table-cell !important; }
+  #tab-users .users-table tbody td::before { content:none !important; display:none !important; }
+}
+
+/* Desktop Registered Users: fit the full table to viewport (keep mobile cards unchanged). */
+@media screen and (min-width: 761px) {
+  #tab-users { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow-x: hidden; }
+  #tab-users .table-wrap { width: 100%; max-width: 100%; min-width: 0; overflow-x: visible; }
+  #tab-users .users-table { width: 100% !important; max-width: 100% !important; min-width: 0 !important; table-layout: fixed !important; }
+  #tab-users .users-table th, #tab-users .users-table td { box-sizing: border-box; padding: 8px 6px; overflow-wrap: anywhere; }
+  #tab-users .users-table th:nth-child(1), #tab-users .users-table td:nth-child(1) { width: 5% !important; }
+  #tab-users .users-table th:nth-child(2), #tab-users .users-table td:nth-child(2) { width: 14% !important; }
+  #tab-users .users-table th:nth-child(3), #tab-users .users-table td:nth-child(3) { width: 14% !important; }
+  #tab-users .users-table th:nth-child(4), #tab-users .users-table td:nth-child(4) { width: 9% !important; }
+  #tab-users .users-table th:nth-child(5), #tab-users .users-table td:nth-child(5) { width: 21% !important; }
+  #tab-users .users-table th:nth-child(6), #tab-users .users-table td:nth-child(6) { width: 9% !important; }
+  #tab-users .users-table th:nth-child(7), #tab-users .users-table td:nth-child(7) { width: 7% !important; }
+  #tab-users .users-table th:nth-child(8), #tab-users .users-table td:nth-child(8) { width: 21% !important; }
+  #tab-users .users-table td:last-child { white-space: normal !important; }
+  #tab-users .users-table td:last-child button { display: inline-flex !important; max-width: 100%; min-width: 0 !important; margin: 2px !important; padding: 7px 8px !important; white-space: normal !important; overflow-wrap: normal !important; }
+}
+
+/* Logged-in account name replaces the old Name dropdown */
+.logged-in-name { display:flex; align-items:center; gap:6px; min-width:0; }
+.logged-in-name .name-static-label { cursor:default; padding:8px 8px; }
+.logged-in-name small { display:inline-block; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:2px 8px; border-radius:10px; background:var(--orange); color:#fff; font-size:11px; font-weight:700; }
+@media (max-width:760px) { .logged-in-name { justify-content:center; } .logged-in-name .name-static-label { padding:8px 4px; } .logged-in-name small { max-width:130px; } }
+/* Admin page: keep the top menu focused on admin navigation and account session. */
+body.admin-view .menu { gap: 6px; }
+body.admin-view #ddStore,
+body.admin-view #ddReport,
+body.admin-view #ddPresent { display: none !important; }

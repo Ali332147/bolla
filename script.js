@@ -1,12 +1,12 @@
 /* ---------- Data: edit these lists to change the dropdowns ---------- */
-const STAFF = [
+let STAFF = [
   "Jaber Ali", "Aman", "Jafor", "Mohammed", "Sazzad",
   "Farid", "Raja", "Ihsan", "Rahim", "Karim",
   "Hasan", "Rubel", "Sohel", "Nayeem", "Rafi",
   "Imran", "Mizan", "Salman", "Arif", "Shakil", "Nasir"
 ];
 // Name dropdown shows names A to Z.
-const STAFF_SORTED = [...STAFF].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+let STAFF_SORTED = [...STAFF].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 const STORES = ["3239", "3309", "109", "2300", "170","211","236","400","450","525","540","542","750","1050","1490"].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));   // Store dropdown: smallest number first
 const SHIFTS = ["day", "afternoon", "night"];
 const ADDRESS = "Sunrise Hwy, Islip Terrace, NY 11752";
@@ -116,6 +116,7 @@ function localDateISO(d = new Date()) {
 
 /* ---------- State (filled in by initState() after login) ---------- */
 let currentUser = null;
+let adminUnlocked = false;
 let lang = "en", selName = "", selStore = "", selShift = "day", sheets = {}, labels = {};
 function initState() {
   lang = load("lang", "en");
@@ -140,14 +141,12 @@ const sheet = () => sheets[sheetKey()] || (sheets[sheetKey()] = blankSheet());
 
 /* ---------- Dropdown menu items (Name, Store, Report) ---------- */
 const dropdowns = {
-  ddName:   { label: () => t("name"),   items: () => STAFF_SORTED.map(n => ({ v: n, l: n })),
-              get: () => selName,   set: v => { selName = v; save("name", v); }, shown: () => selName },
   ddStore:  { label: () => t("store"),  items: () => STORES.map(s => ({ v: s, l: s })),
               get: () => selStore,  set: v => { selStore = v; save("store", v); }, shown: () => selStore },
   ddReport: { label: () => t("shift"), items: () => SHIFTS.map(s => ({ v: s, l: t(s) })),
               get: () => selShift,  set: v => { selShift = v; save("shift", v); }, shown: () => t(selShift) },
   // Present / Late / Absent for the selected Name on the selected Date and Store
-  ddPresent: { label: () => t("present"), items: () => [{ v: "", l: "—" }, ...["present", "late", "absent"].map(k => ({ v: k, l: t(k) })), { v: "__list", l: t("regList"), sep: true }],
+  ddPresent: { label: () => t("present"), items: () => [{ v: "", l: "—" }, ...["present", "late", "absent"].map(k => ({ v: k, l: t(k) })), ...(isAdmin() ? [{ v: "__list", l: t("regList"), sep: true }] : [])],
               get: () => sheet().att || "", set: v => { if (v === "__list") { showUsers(); return true; } sheet().att = v; save("sheets", sheets); }, shown: () => (sheet().att ? t(sheet().att) : "") }
 };
 
@@ -189,13 +188,11 @@ function renderGlobalSearchResults() {
   const query = (globalSearch.value || "").trim().toLowerCase();
   globalSearchResults.replaceChildren();
   if (!query) { globalSearchResults.hidden = true; return; }
-  const matches = [
-    ...STAFF.filter(name => name.toLowerCase().includes(query)).map(value => ({ value, type: "name", label: value, hint: "Name" })),
-    ...STORES.filter(store => store.toLowerCase().includes(query)).map(value => ({ value, type: "store", label: value, hint: "Store" }))
-  ].slice(0, 12);
+  const matches = STORES.filter(store => store.toLowerCase().includes(query))
+    .map(value => ({ value, type: "store", label: value, hint: "Store" })).slice(0, 12);
   if (!matches.length) {
     const empty = document.createElement("div");
-    empty.textContent = "No matching name or store";
+    empty.textContent = "No matching store";
     empty.style.padding = "12px 14px";
     globalSearchResults.appendChild(empty);
   } else {
@@ -206,8 +203,7 @@ function renderGlobalSearchResults() {
       const hint = document.createElement("small"); hint.textContent = match.hint;
       button.append(label, hint);
       button.addEventListener("click", () => {
-        if (match.type === "name") { selName = match.value; save("name", selName); }
-        else { selStore = match.value; save("store", selStore); }
+        selStore = match.value; save("store", selStore);
         globalSearch.value = ""; globalSearchResults.hidden = true; showMain(); renderAll();
       });
       globalSearchResults.appendChild(button);
@@ -226,8 +222,45 @@ if (globalSearch) {
 
 /* ---------- Panels ---------- */
 // Single page now (Upload removed); kept so the menu and search handlers can still call it.
-function showMain() { $("tab-main").classList.add("active"); $("tab-users").classList.remove("active"); }
-function showUsers() { $("tab-main").classList.remove("active"); $("tab-users").classList.add("active"); renderUsers(); window.scrollTo(0, 0); }
+function syncAdminMenu() {
+  const adminPage = $("tab-admin").classList.contains("active");
+  ["ddStore", "ddReport", "ddPresent"].forEach(id => { $(id).hidden = adminPage; });
+  $("registeredListTab").hidden = !adminPage || !isAdmin();
+  document.body.classList.toggle("admin-view", adminPage);
+}
+function showMain() { $("tab-main").classList.add("active"); $("tab-users").classList.remove("active"); $("tab-admin").classList.remove("active"); syncAdminMenu(); window.scrollTo(0, 0); }
+function requireAdminPassword() {
+  // Admin accounts are already verified at login. Team members must enter the shared Admin Panel password once.
+  if (isAdmin()) return true;
+  const entered = prompt("Enter Admin Control Panel password:");
+  if (entered !== "bolla321") {
+    if (entered !== null) alert("Incorrect Admin password.");
+    return false;
+  }
+  adminUnlocked = true;
+  syncAdminMenu();
+  return true;
+}
+function showUsers() { if (!requireAdminPassword()) return; $("tab-main").classList.remove("active"); $("tab-admin").classList.remove("active"); $("tab-users").classList.add("active"); syncAdminMenu(); renderUsers(); window.scrollTo(0, 0); }
+function isAdmin() { return !!currentUser && (currentUser.role === "admin" || adminUnlocked); }
+// Link only names that exactly match the employee profile currently available on the directory site.
+const EMPLOYEE_PROFILE_URL = "https://ali332147.github.io/bollaempcard/";
+function employeeProfileMatches(name) {
+  return String(name || "").trim().replace(/\s+/g, " ").toLocaleLowerCase() === "jaber ali";
+}
+function makeEmployeeNameLink(name, className = "employee-profile-link") {
+  const label = String(name || "");
+  if (!employeeProfileMatches(label)) return document.createTextNode(label);
+  const a = document.createElement("a");
+  a.href = EMPLOYEE_PROFILE_URL;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.className = className;
+  a.textContent = label;
+  a.title = "Open matching employee profile";
+  return a;
+}
+function showAdmin() { if (!requireAdminPassword()) return; persist(sheet()); $("tab-main").classList.remove("active"); $("tab-users").classList.remove("active"); $("tab-admin").classList.add("active"); syncAdminMenu(); renderAdmin(); window.scrollTo(0, 0); }
 
 /* ---------- Language + RTL ---------- */
 function applyLang() {
@@ -263,7 +296,7 @@ function recalc(s) {
 function renderAll() {
   Object.keys(dropdowns).forEach(renderDropdown);
   $("sheetStore").textContent = selStore;
-  $("sheetName").textContent = selName;
+  $("sheetName").textContent = currentUser ? (currentUser.name || currentUser.username) : selName;
   $("sheetAtt").textContent = sheet().att ? t(sheet().att) : "—";
   $("shiftList").replaceChildren(...SHIFTS.map(k => Object.assign(document.createElement("option"), { value: t(k) })));
   const s = sheet();
@@ -420,7 +453,7 @@ window.addEventListener("afterprint", () => {
 $("printBtn").addEventListener("click", () => window.print());
 
 /* ---------- Download PDF (one page, automatically downloaded) ---------- */
-function buildSinglePagePdfFromCanvas(canvas) {
+function buildSinglePagePdfFromCanvas(canvas, linkRect = null, sourceCssWidth = null) {
   const jpegData = canvas.toDataURL("image/jpeg", 0.96).split(",")[1];
   const binary = atob(jpegData);
   const jpeg = new Uint8Array(binary.length);
@@ -432,6 +465,19 @@ function buildSinglePagePdfFromCanvas(canvas) {
   const drawW = canvas.width * scale, drawH = canvas.height * scale;
   const x = (pageW - drawW) / 2, y = (pageH - drawH) / 2;
   const content = `q\n${drawW.toFixed(3)} 0 0 ${drawH.toFixed(3)} ${x.toFixed(3)} ${y.toFixed(3)} cm\n/Im0 Do\nQ\n`;
+  // Add a real PDF link annotation over the QR image + caption. The QR pixels
+  // remain unchanged, so camera scanning still works in the downloaded PDF.
+  let linkAnnotation = null;
+  if (linkRect && sourceCssWidth && sourceCssWidth > 0) {
+    const cssToPdf = (canvas.width / sourceCssWidth) * scale;
+    const left = x + linkRect.x * cssToPdf;
+    const right = x + (linkRect.x + linkRect.width) * cssToPdf;
+    const top = y + drawH - linkRect.y * cssToPdf;
+    const bottom = y + drawH - (linkRect.y + linkRect.height) * cssToPdf;
+    if (right > left && top > bottom) {
+      linkAnnotation = `6 0 obj\n<< /Type /Annot /Subtype /Link /Rect [${left.toFixed(3)} ${bottom.toFixed(3)} ${right.toFixed(3)} ${top.toFixed(3)}] /Border [0 0 0] /A << /S /URI /URI (https://ali332147.github.io/bollaempcard/) >> >>\nendobj\n`;
+    }
+  }
   const enc = new TextEncoder();
   const ascii = v => enc.encode(v);
   const chunks = [];
@@ -442,7 +488,7 @@ function buildSinglePagePdfFromCanvas(canvas) {
   const objects = [
     ascii("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"),
     ascii("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"),
-    ascii("3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>\nendobj\n"),
+    ascii(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R${linkAnnotation ? " /Annots [6 0 R]" : ""} >>\nendobj\n`),
     ascii(`4 0 obj\n<< /Length ${ascii(content).length} >>\nstream\n${content}endstream\nendobj\n`)
   ];
   objects.forEach((obj, i) => { offsets[i + 1] = length; push(obj); });
@@ -450,10 +496,15 @@ function buildSinglePagePdfFromCanvas(canvas) {
   push(ascii(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`));
   push(jpeg);
   push(ascii("\nendstream\nendobj\n"));
+  if (linkAnnotation) {
+    offsets[6] = length;
+    push(ascii(linkAnnotation));
+  }
   const xrefOffset = length;
-  let xref = "xref\n0 6\n0000000000 65535 f \n";
-  for (let i = 1; i <= 5; i++) xref += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
-  xref += `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  const size = linkAnnotation ? 7 : 6;
+  let xref = `xref\n0 ${size}\n0000000000 65535 f \n`;
+  for (let i = 1; i < size; i++) xref += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  xref += `trailer\n<< /Size ${size} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
   push(ascii(xref));
   return new Blob(chunks, { type: "application/pdf" });
 }
@@ -473,6 +524,16 @@ $("pngBtn").addEventListener("click", async () => {
   tabEl.style.cssText += ";width:760px;max-width:none;flex:none;min-height:980px";
   try {
     await new Promise(r => setTimeout(r, 60));   // let the browser lay out the report view
+    const tabBounds = tabEl.getBoundingClientRect();
+    const qrLinkEl = tabEl.querySelector(".rpt-qr-link");
+    const qrBounds = qrLinkEl ? qrLinkEl.getBoundingClientRect() : null;
+    const qrLinkRect = qrBounds ? {
+      x: qrBounds.left - tabBounds.left,
+      y: qrBounds.top - tabBounds.top,
+      width: qrBounds.width,
+      height: qrBounds.height
+    } : null;
+    const sourceCssWidth = tabEl.clientWidth;
     const canvas = await html2canvas(tabEl, {
       scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: 1200,
       onclone: doc => {
@@ -529,7 +590,7 @@ $("pngBtn").addEventListener("click", async () => {
       },
       ignoreElements: el => el.classList && el.classList.contains("no-print")
     });
-    const blob = buildSinglePagePdfFromCanvas(canvas);
+    const blob = buildSinglePagePdfFromCanvas(canvas, qrLinkRect, sourceCssWidth);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = `Bolla_${selStore}_${selName}_${attDate.value}.pdf`;
@@ -577,12 +638,30 @@ function renderUsers() {
   body.replaceChildren();
   rows.forEach((u, i) => {
     const tr = document.createElement("tr");
-    const cells = [String(i + 1), u.name || "—", u.mobile || "—", u.username || "—"];
-    cells.forEach((text, c) => { const td = document.createElement("td"); td.textContent = text; if (c) td.className = "left"; tr.appendChild(td); });
+    const cells = [String(i + 1), u.name || "—", u.mobile || "—", u.store || "—", u.username || "—", u.role === "admin" ? "Admin" : "Team member"];
+    const mobileLabels = ["S.No", "Name", "Mobile number", "Store", "Email", "Role"];
+    cells.forEach((text, c) => { const td = document.createElement("td"); td.dataset.label = mobileLabels[c]; if (c === 1) td.appendChild(makeEmployeeNameLink(u.name || "—", "employee-profile-link registered-employee-link")); else td.textContent = text; if (c) td.className = "left"; tr.appendChild(td); });
     const st = document.createElement("td");
+    st.dataset.label = "Status";
     st.textContent = t(u.active ? "active" : "inactive");
     st.className = u.active ? "st-active" : "st-inactive";
     tr.appendChild(st);
+    const actions = document.createElement("td");
+    actions.dataset.label = "Admin actions";
+    if (isAdmin()) {
+      let roleBtn = null;
+      // The Make Team action is intentionally removed. Team accounts can still be promoted to Admin.
+      if (u.role !== "admin") {
+        roleBtn = document.createElement("button"); roleBtn.type = "button"; roleBtn.className = "secondary admin-small"; roleBtn.textContent = "Make Admin";
+        roleBtn.addEventListener("click", () => { const all = getUsers(); const target = all.find(x => x.id === u.id); if (!target) return; target.role = "admin"; rawSet(localStorage, USERS_KEY, all); renderUsers(); renderAdmin(); });
+      }
+      const editBtn = document.createElement("button"); editBtn.type = "button"; editBtn.className = "secondary admin-small"; editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => { const name = prompt("Edit full name:", u.name || ""); if (name === null) return; const mobile = prompt("Edit mobile number:", u.mobile || ""); if (mobile === null) return; const store = prompt("Edit Store:", u.store || ""); if (store === null) return; const email = prompt("Edit email:", u.username || ""); if (email === null) return; const cleanEmail = email.trim().toLowerCase(); const all = getUsers(); if (all.some(x => x.id !== u.id && x.username === cleanEmail)) return alert("That email is already in use."); const target = all.find(x => x.id === u.id); if (!target) return; if (name.trim().length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) return alert("Enter a valid name and email."); target.name = name.trim().replace(/\s+/g, " "); target.mobile = mobile.trim(); target.store = store.trim(); target.username = cleanEmail; rawSet(localStorage, USERS_KEY, all); if (currentUser.id === target.id) { currentUser = target; } renderUsers(); renderAdmin(); renderAll(); });
+      const delBtn = document.createElement("button"); delBtn.type = "button"; delBtn.className = "remove admin-small"; delBtn.textContent = "Delete";
+      delBtn.addEventListener("click", () => { if (u.id === currentUser.id) return alert("You cannot delete the account you are currently using."); const all = getUsers(); if (u.role === "admin" && all.filter(x => x.role === "admin").length <= 1) return alert("Keep at least one Admin account."); if (!confirm(`Delete account for ${u.name || u.username}?`)) return; rawSet(localStorage, USERS_KEY, all.filter(x => x.id !== u.id)); renderUsers(); renderAdmin(); });
+      actions.append(editBtn); if (roleBtn) actions.append(roleBtn); actions.append(delBtn);
+    }
+    tr.appendChild(actions);
     body.appendChild(tr);
   });
   const active = rows.filter(r => r.active).length;
@@ -590,7 +669,8 @@ function renderUsers() {
   $("usersCounts").textContent = `${t("active")}: ${active} · ${t("inactive")}: ${rows.length - active} · ${rows.length}`;
 }
 $("usersBack").addEventListener("click", () => { showMain(); renderAll(); });
-$("usersPrint").addEventListener("click", () => { renderUsers(); window.print(); });
+$("usersPrint").addEventListener("click", () => { renderUsers(); document.body.classList.add("print-users-only"); window.print(); });
+window.addEventListener("afterprint", () => document.body.classList.remove("print-users-only"));
 
 // Multi-page PDF from page images (pages: [{ jpeg: Uint8Array, pxW, pxH, ptW, ptH }]).
 function assemblePdf(pages) {
@@ -667,10 +747,45 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
 const BACKUP_KEYS = ["lang", "name", "store", "shift", "sheets", "labels"];
+/* ---------- Admin controls: staff list and registered accounts ---------- */
+function renderAdmin() {
+  if (!isAdmin()) return;
+  const list = $("adminStaffList"); list.replaceChildren();
+  const searchValue = ($("adminStaffSearch")?.value || "").trim().toLocaleLowerCase();
+  const filteredStaff = STAFF_SORTED.filter(name => name.toLocaleLowerCase().includes(searchValue));
+  filteredStaff.forEach((name, idx) => {
+    const row = document.createElement("div"); row.className = "admin-staff-row";
+    const input = document.createElement("input"); input.type = "text"; input.maxLength = 60; input.value = name; input.setAttribute("aria-label", `Staff name ${idx + 1}`);
+    const saveBtn = document.createElement("button"); saveBtn.type = "button"; saveBtn.textContent = "Save";
+    saveBtn.addEventListener("click", () => { const value = input.value.trim().replace(/\s+/g, " "); if (value.length < 2) return alert("Enter a valid staff name."); if (STAFF_SORTED.some(n => n.toLowerCase() === value.toLowerCase() && n !== name)) return alert("That name already exists."); STAFF = STAFF.map(n => n === name ? value : n); STAFF_SORTED = [...new Set(STAFF)].sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:"base"})); rawSet(localStorage, STAFF_KEY, STAFF); renderAdmin(); renderAll(); });
+    const delBtn = document.createElement("button"); delBtn.type = "button"; delBtn.className = "remove"; delBtn.textContent = "Delete";
+    delBtn.addEventListener("click", () => { if (!confirm(`Delete staff name ${name}?`)) return; STAFF = STAFF.filter(n => n !== name); STAFF_SORTED = [...new Set(STAFF)].sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:"base"})); rawSet(localStorage, STAFF_KEY, STAFF); if (selName === name) { selName = STAFF_SORTED[0] || currentUser.name; save("name", selName); } renderAdmin(); renderAll(); });
+    if (employeeProfileMatches(name)) {
+      // Show the matching name only once. Edit switches the link to the editable input.
+      const profileLink = makeEmployeeNameLink(name, "employee-profile-link admin-profile-link");
+      profileLink.title = "Open matching employee profile";
+      const editBtn = document.createElement("button"); editBtn.type = "button"; editBtn.className = "secondary"; editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => { row.replaceChildren(input, saveBtn, delBtn); input.focus(); });
+      row.append(profileLink, editBtn, delBtn);
+    } else {
+      row.append(input, saveBtn, delBtn);
+    }
+    list.appendChild(row);
+  });
+  if (!filteredStaff.length) { const empty = document.createElement("p"); empty.className = "hint"; empty.textContent = searchValue ? "No matching names found." : "No names added yet."; list.appendChild(empty); }
+  $("adminUserCount").textContent = `${getUsers().length} registered account(s)`;
+}
+$("adminStaffSearch").addEventListener("input", renderAdmin);
+$("adminAddStaff").addEventListener("click", () => { if (!isAdmin()) return; const input = $("adminNewStaff"); const name = input.value.trim().replace(/\s+/g, " "); if (name.length < 2) return alert("Enter a staff name."); if (STAFF_SORTED.some(n => n.toLowerCase() === name.toLowerCase())) return alert("That name already exists."); STAFF.push(name); STAFF_SORTED = [...new Set(STAFF)].sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:"base"})); rawSet(localStorage, STAFF_KEY, STAFF); input.value = ""; renderAdmin(); renderAll(); });
+$("adminUsers").addEventListener("click", showUsers);
+$("adminBack").addEventListener("click", () => { showMain(); renderAll(); });
+$("adminTab").addEventListener("click", showAdmin);
+$("registeredListTab").addEventListener("click", showUsers);
+
 /* ---------- Accounts: register, login, logout ---------- */
 // Note: this site has no server, so accounts live in this browser only. Passwords are never stored
 // as text (salted PBKDF2 hashes), and each account keeps its own separate data.
-const USERS_KEY = "bolla_users", SESSION_KEY = "bolla_session", LOCK_KEY = "bolla_lock";
+const USERS_KEY = "bolla_users", SESSION_KEY = "bolla_session", LOCK_KEY = "bolla_lock", STAFF_KEY = "bolla_staff_list";
 const SESSION_DAYS = 30, MAX_TRIES = 5;
 const textEnc = new TextEncoder();
 const toHex = bytes => [...bytes].map(b => b.toString(16).padStart(2, "0")).join("");
@@ -683,6 +798,15 @@ const randomHex = n => toHex(crypto.getRandomValues(new Uint8Array(n)));
 function rawGet(store, key, fallback) { try { return JSON.parse(store.getItem(key)) ?? fallback; } catch (_) { return fallback; } }
 function rawSet(store, key, value) { try { store.setItem(key, JSON.stringify(value)); return true; } catch (_) { return false; } }
 const getUsers = () => { const u = rawGet(localStorage, USERS_KEY, []); return Array.isArray(u) ? u : []; };
+function normalizeRoles() {
+  const users = getUsers();
+  if (users.length && !users.some(u => u.role === "admin")) users[0].role = "admin"; // migrate older local demo accounts
+  users.forEach(u => { if (!u.role) u.role = "team"; });
+  rawSet(localStorage, USERS_KEY, users);
+  const savedStaff = rawGet(localStorage, STAFF_KEY, null);
+  if (Array.isArray(savedStaff)) STAFF = savedStaff;
+  STAFF_SORTED = [...new Set(STAFF)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+}
 
 // Plain-JS SHA-256, used only when the page is opened over plain http (no WebCrypto).
 const SHA = (() => {
@@ -750,8 +874,8 @@ async function registerUser(name, username, password, mobile) {
   if (users.some(u => u.username === username)) return { ok: false, error: "That email is already registered. Try logging in." };
   const alg = hasSubtle() ? "pbkdf2" : "sha256x";
   const salt = randomHex(16);
-  const user = { id: randomHex(6), username, name, mobile, alg, salt, hash: await hashPassword(password, salt, alg), created: new Date().toISOString() };
   const first = users.length === 0;
+  const user = { id: randomHex(6), username, name, mobile, role: first ? "admin" : "team", alg, salt, hash: await hashPassword(password, salt, alg), created: new Date().toISOString() };
   users.push(user);
   if (!rawSet(localStorage, USERS_KEY, users)) return { ok: false, error: "This browser is blocking storage (private mode?), so the account could not be saved." };
   if (first) migrateLegacyData(user.id);
@@ -808,12 +932,22 @@ function leave() {
 window.addEventListener("pagehide", leave);
 
 function startApp(user) {
-  currentUser = user;
+  currentUser = getUsers().find(u => u.id === user.id) || user;
+  adminUnlocked = false;
   NS = `bolla:${user.id}:`;
+  normalizeRoles();
+  currentUser = getUsers().find(u => u.id === user.id) || user;
   initState();
+  selName = currentUser.name || currentUser.username;
+  save("name", selName);
   attDate.value = localDateISO();
-  $("userChip").textContent = (user.name || user.username).split(" ")[0];
-  $("logoutTab").title = `${user.name} (${user.username})`;
+  // Name is intentionally not displayed in the main menu for Admin or Team Member.
+  $("logoutTab").title = `${currentUser.name} (${currentUser.username})`;
+  $("adminTab").hidden = false;
+  $("ddPresent").hidden = false;
+  $("registeredListTab").hidden = true;
+  // Always initialize the signed-in user on the main dashboard. Login/boot routes Admin accounts afterward.
+  showMain();
   document.body.classList.remove("locked");
   applyLang();
   beat();
@@ -862,9 +996,14 @@ $("loginForm").addEventListener("submit", e => {
     if (!username || !password) return setAuthError("loginError", "Enter your email and password.");
     const res = await loginUser(username, password);
     if (!res.ok) return setAuthError("loginError", res.error);
-    setSession(res.user, $("loginRemember").checked);
+    normalizeRoles();
+    // Always use the freshly stored role after normalization; never route by a stale login result.
+    const loggedInUser = getUsers().find(u => u.id === res.user.id) || res.user;
+    setSession(loggedInUser, $("loginRemember").checked);
     $("loginPass").value = "";
-    startApp(res.user);
+    startApp(loggedInUser);
+    if (loggedInUser.role === "admin") showAdmin();
+    else { adminUnlocked = false; showMain(); renderAll(); }
   });
 });
 $("registerForm").addEventListener("submit", e => {
@@ -880,17 +1019,53 @@ $("registerForm").addEventListener("submit", e => {
     if (pass !== pass2) return setAuthError("registerError", "Passwords do not match.");
     const res = await registerUser(name, username, pass, mobile);
     if (!res.ok) return setAuthError("registerError", res.error);
-    setSession(res.user, true);
+    normalizeRoles();
+    setSession(getUsers().find(u => u.id === res.user.id) || res.user, true);
     $("regPass").value = ""; $("regPass2").value = "";
     startApp(res.user);
   });
 });
 
-// Start: signed-in users go straight in, everyone else sees the login (or first-time register) screen.
-(function boot() {
-  const user = getSessionUser();
-  if (user) { startApp(user); return; }
-  showAuthTab(getUsers().length ? "login" : "register", false);
+// Ensure the fixed Admin account exists on this browser before showing the login screen.
+// NOTE: This is browser-local demo authentication, not server-side account provisioning.
+async function ensureDefaultAdmin() {
+  const username = "admin@gmail.com", password = "bolla321";
+  const users = getUsers();
+  let admin = users.find(u => String(u.username || "").toLowerCase() === username);
+  const alg = hasSubtle() ? "pbkdf2" : "sha256x";
+  const salt = randomHex(16);
+  const hash = await hashPassword(password, salt, alg);
+  if (admin) {
+    admin.username = username;
+    admin.name = admin.name || "Bolla Admin";
+    admin.role = "admin";
+    admin.alg = alg; admin.salt = salt; admin.hash = hash;
+  } else {
+    admin = { id: randomHex(6), username, name: "Bolla Admin", mobile: "", store: "", role: "admin", alg, salt, hash, created: new Date().toISOString() };
+    users.push(admin);
+  }
+  if (!rawSet(localStorage, USERS_KEY, users)) throw new Error("Unable to save Admin account in this browser.");
+  normalizeRoles();
+  return admin;
+}
+
+// Start: ensure Admin is registered, then restore an existing session or show Login.
+(async function boot() {
+  try {
+    await ensureDefaultAdmin();
+    const sessionUser = getSessionUser();
+    if (sessionUser) {
+      const user = getUsers().find(u => u.id === sessionUser.id) || sessionUser;
+      startApp(user);
+      if (user.role === "admin") showAdmin();
+      else { adminUnlocked = false; showMain(); renderAll(); }
+      return;
+    }
+    showAuthTab("login", false);
+  } catch (err) {
+    showAuthTab("login", false);
+    setAuthError("loginError", "Could not initialize the Admin account. Please allow browser storage and reload.");
+  }
 })();
 
 // Footer year stays current automatically.
