@@ -840,8 +840,11 @@ function rawSet(store, key, value) { try { store.setItem(key, JSON.stringify(val
 const getUsers = () => { const u = rawGet(localStorage, USERS_KEY, []); return Array.isArray(u) ? u : []; };
 function normalizeRoles() {
   const users = getUsers();
-  if (users.length && !users.some(u => u.role === "admin")) users[0].role = "admin"; // migrate older local demo accounts
-  users.forEach(u => { if (!u.role) u.role = "team"; });
+  // Only the fixed admin account is privileged by default. Never promote a regular user automatically.
+  users.forEach(u => {
+    if (String(u.username || "").toLowerCase() === "admin@gmail.com") u.role = "admin";
+    else if (!u.role || u.role === "admin") u.role = "team";
+  });
   rawSet(localStorage, USERS_KEY, users);
   const savedStaff = rawGet(localStorage, STAFF_KEY, null);
   if (Array.isArray(savedStaff)) STAFF = savedStaff;
@@ -914,8 +917,8 @@ async function registerUser(name, username, password, mobile, store) {
   if (users.some(u => u.username === username)) return { ok: false, error: "That email is already registered. Try logging in." };
   const alg = hasSubtle() ? "pbkdf2" : "sha256x";
   const salt = randomHex(16);
-  const first = users.length === 0;
-  const user = { id: randomHex(6), username, name, mobile, store: store || "", role: first ? "admin" : "team", alg, salt, hash: await hashPassword(password, salt, alg), created: new Date().toISOString() };
+  // Every public registration is a Team Member. Admin access is reserved for admin@gmail.com.
+  const user = { id: randomHex(6), username, name, mobile, store: store || "", role: "team", alg, salt, hash: await hashPassword(password, salt, alg), created: new Date().toISOString() };
   users.push(user);
   if (!rawSet(localStorage, USERS_KEY, users)) return { ok: false, error: "This browser is blocking storage (private mode?), so the account could not be saved." };
   if (first) migrateLegacyData(user.id);
