@@ -10,6 +10,7 @@ let STAFF_SORTED = [...STAFF].sort((a, b) => a.localeCompare(b, undefined, { sen
 const STORES = ["3239", "3309", "109", "2300", "170","211","236","400","450","525","540","542","750","1050","1490"].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));   // Store dropdown: smallest number first
 const SHIFTS = ["day", "afternoon", "night"];
 const ADDRESS = "Sunrise Hwy, Islip Terrace, NY 11752";
+const EMPLOYEE_PROFILE_URL = "https://ali332147.github.io/bollaempcard/";
 
 /* ---------- Translations ---------- */
 const T = {
@@ -243,10 +244,10 @@ function requireAdminPassword() {
 }
 function showUsers() { if (!requireAdminPassword()) return; $("tab-main").classList.remove("active"); $("tab-admin").classList.remove("active"); $("tab-users").classList.add("active"); syncAdminMenu(); renderUsers(); window.scrollTo(0, 0); }
 function isAdmin() { return !!currentUser && (currentUser.role === "admin" || adminUnlocked); }
-// Link only names that exactly match the employee profile currently available on the directory site.
-const EMPLOYEE_PROFILE_URL = "https://ali332147.github.io/bollaempcard/";
 function employeeProfileMatches(name) {
-  return String(name || "").trim().replace(/\s+/g, " ").toLocaleLowerCase() === "jaber ali";
+  const normalize = value => String(value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase();
+  const loggedInName = normalize(currentUser?.name);
+  return !!loggedInName && normalize(name) === loggedInName;
 }
 function makeEmployeeNameLink(name, className = "employee-profile-link") {
   const label = String(name || "");
@@ -475,7 +476,7 @@ function buildSinglePagePdfFromCanvas(canvas, linkRect = null, sourceCssWidth = 
     const top = y + drawH - linkRect.y * cssToPdf;
     const bottom = y + drawH - (linkRect.y + linkRect.height) * cssToPdf;
     if (right > left && top > bottom) {
-      linkAnnotation = `6 0 obj\n<< /Type /Annot /Subtype /Link /Rect [${left.toFixed(3)} ${bottom.toFixed(3)} ${right.toFixed(3)} ${top.toFixed(3)}] /Border [0 0 0] /A << /S /URI /URI (https://ali332147.github.io/bollaempcard/) >> >>\nendobj\n`;
+      linkAnnotation = `6 0 obj\n<< /Type /Annot /Subtype /Link /Rect [${left.toFixed(3)} ${bottom.toFixed(3)} ${right.toFixed(3)} ${top.toFixed(3)}] /Border [0 0 0] /A << /S /URI /URI () >> >>\nendobj\n`;
     }
   }
   const enc = new TextEncoder();
@@ -656,7 +657,7 @@ function renderUsers() {
         roleBtn.addEventListener("click", () => { const all = getUsers(); const target = all.find(x => x.id === u.id); if (!target) return; target.role = "admin"; rawSet(localStorage, USERS_KEY, all); renderUsers(); renderAdmin(); });
       }
       const editBtn = document.createElement("button"); editBtn.type = "button"; editBtn.className = "secondary admin-small"; editBtn.textContent = "Edit";
-      editBtn.addEventListener("click", () => { const name = prompt("Edit full name:", u.name || ""); if (name === null) return; const mobile = prompt("Edit mobile number:", u.mobile || ""); if (mobile === null) return; const store = prompt("Edit Store:", u.store || ""); if (store === null) return; const email = prompt("Edit email:", u.username || ""); if (email === null) return; const cleanEmail = email.trim().toLowerCase(); const all = getUsers(); if (all.some(x => x.id !== u.id && x.username === cleanEmail)) return alert("That email is already in use."); const target = all.find(x => x.id === u.id); if (!target) return; if (name.trim().length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) return alert("Enter a valid name and email."); target.name = name.trim().replace(/\s+/g, " "); target.mobile = mobile.trim(); target.store = store.trim(); target.username = cleanEmail; rawSet(localStorage, USERS_KEY, all); if (currentUser.id === target.id) { currentUser = target; } renderUsers(); renderAdmin(); renderAll(); });
+      editBtn.addEventListener("click", () => openEditUser(u));
       const delBtn = document.createElement("button"); delBtn.type = "button"; delBtn.className = "remove admin-small"; delBtn.textContent = "Delete";
       delBtn.addEventListener("click", () => { if (u.id === currentUser.id) return alert("You cannot delete the account you are currently using."); const all = getUsers(); if (u.role === "admin" && all.filter(x => x.role === "admin").length <= 1) return alert("Keep at least one Admin account."); if (!confirm(`Delete account for ${u.name || u.username}?`)) return; rawSet(localStorage, USERS_KEY, all.filter(x => x.id !== u.id)); renderUsers(); renderAdmin(); });
       actions.append(editBtn); if (roleBtn) actions.append(roleBtn); actions.append(delBtn);
@@ -668,6 +669,45 @@ function renderUsers() {
   $("usersDate").textContent = `${localDateISO()} ${nowHHMM()}`;
   $("usersCounts").textContent = `${t("active")}: ${active} · ${t("inactive")}: ${rows.length - active} · ${rows.length}`;
 }
+let editingUserId = null;
+function openEditUser(user) {
+  editingUserId = user.id;
+  $("editUserName").value = user.name || "";
+  $("editUserMobile").value = user.mobile || "";
+  $("editUserStore").value = user.store || "";
+  $("editUserEmail").value = user.username || "";
+  $("editUserRole").value = user.role === "admin" ? "admin" : "team";
+  $("editUserError").hidden = true; $("editUserError").textContent = "";
+  $("editUserModal").hidden = false; $("editUserName").focus();
+}
+function closeEditUser() { $("editUserModal").hidden = true; editingUserId = null; }
+$("editUserCancel").addEventListener("click", closeEditUser);
+$("editUserModal").addEventListener("click", e => { if (e.target === $("editUserModal")) closeEditUser(); });
+$("editUserForm").addEventListener("submit", e => {
+  e.preventDefault();
+  if (!isAdmin() || !editingUserId) return;
+  const name = $("editUserName").value.trim().replace(/\s+/g, " ");
+  const mobile = $("editUserMobile").value.trim().replace(/\s+/g, " ");
+  const digits = mobile.replace(/\D/g, "");
+  const store = $("editUserStore").value.trim();
+  const email = $("editUserEmail").value.trim().toLowerCase();
+  const role = $("editUserRole").value;
+  const error = $("editUserError");
+  const fail = msg => { error.textContent = msg; error.hidden = false; };
+  error.hidden = true;
+  if (name.length < 2 || name.length > 50) return fail("Enter a valid full name (2–50 characters).");
+  if (!/^\+?[0-9 ()-]{7,20}$/.test(mobile) || digits.length < 7 || digits.length > 15) return fail("Enter a valid mobile number.");
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return fail("Enter a valid email address.");
+  const all = getUsers();
+  if (all.some(x => x.id !== editingUserId && x.username.toLowerCase() === email)) return fail("That email is already in use.");
+  const target = all.find(x => x.id === editingUserId); if (!target) return closeEditUser();
+  if (target.role === "admin" && role !== "admin" && all.filter(x => x.role === "admin").length <= 1) return fail("Keep at least one Admin account.");
+  target.name = name; target.mobile = mobile; target.store = store; target.username = email; target.role = role;
+  if (!rawSet(localStorage, USERS_KEY, all)) return fail("Could not save changes in this browser.");
+  if (currentUser && currentUser.id === target.id) { currentUser = target; }
+  closeEditUser(); renderUsers(); renderAdmin(); renderAll();
+});
+
 $("usersBack").addEventListener("click", () => { showMain(); renderAll(); });
 $("usersPrint").addEventListener("click", () => { renderUsers(); document.body.classList.add("print-users-only"); window.print(); });
 window.addEventListener("afterprint", () => document.body.classList.remove("print-users-only"));
@@ -869,13 +909,13 @@ function migrateLegacyData(userId) {
     } catch (_) {}
   });
 }
-async function registerUser(name, username, password, mobile) {
+async function registerUser(name, username, password, mobile, store) {
   const users = getUsers();
   if (users.some(u => u.username === username)) return { ok: false, error: "That email is already registered. Try logging in." };
   const alg = hasSubtle() ? "pbkdf2" : "sha256x";
   const salt = randomHex(16);
   const first = users.length === 0;
-  const user = { id: randomHex(6), username, name, mobile, role: first ? "admin" : "team", alg, salt, hash: await hashPassword(password, salt, alg), created: new Date().toISOString() };
+  const user = { id: randomHex(6), username, name, mobile, store: store || "", role: first ? "admin" : "team", alg, salt, hash: await hashPassword(password, salt, alg), created: new Date().toISOString() };
   users.push(user);
   if (!rawSet(localStorage, USERS_KEY, users)) return { ok: false, error: "This browser is blocking storage (private mode?), so the account could not be saved." };
   if (first) migrateLegacyData(user.id);
@@ -1006,18 +1046,27 @@ $("loginForm").addEventListener("submit", e => {
     else { adminUnlocked = false; showMain(); renderAll(); }
   });
 });
+// Store is optional in registration and must never block account creation.
+const registrationStoreField = $("regStore");
+if (registrationStoreField) {
+  registrationStoreField.required = false;
+  registrationStoreField.removeAttribute("required");
+  registrationStoreField.setCustomValidity("");
+}
+
 $("registerForm").addEventListener("submit", e => {
   e.preventDefault();
   runAuth(e.target, "registerError", "Creating account…", "Create account", async () => {
     const name = $("regName").value.trim().replace(/\s+/g, " "), username = $("regUser").value.trim().toLowerCase();
     const pass = $("regPass").value, pass2 = $("regPass2").value;
     const mobile = $("regMobile").value.trim().replace(/\s+/g, " "), digits = mobile.replace(/\D/g, "");
+    const store = String($("regStore").value || "").trim();
     if (name.length < 2 || name.length > 50) return setAuthError("registerError", "Enter your full name (2–50 characters).");
     if (!/^\+?[0-9 ()-]{7,20}$/.test(mobile) || digits.length < 7 || digits.length > 15) return setAuthError("registerError", "Enter a valid mobile number, like +1 917 435 2695.");
     if (username.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(username)) return setAuthError("registerError", "Enter a valid email address, like name@example.com.");
     if (pass.length < 8 || !/[A-Za-z]/.test(pass) || !/\d/.test(pass)) return setAuthError("registerError", "Password needs at least 8 characters, with a letter and a number.");
     if (pass !== pass2) return setAuthError("registerError", "Passwords do not match.");
-    const res = await registerUser(name, username, pass, mobile);
+    const res = await registerUser(name, username, pass, mobile, store);
     if (!res.ok) return setAuthError("registerError", res.error);
     normalizeRoles();
     setSession(getUsers().find(u => u.id === res.user.id) || res.user, true);

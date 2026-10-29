@@ -98,13 +98,17 @@ button:hover { filter: brightness(1.08); }
   .actions button { flex: 1 1 140px; }
 }
 @media print {
-  @page { size: letter portrait; margin: 0.35in; }
-  body { background: #fff; }
-  .no-print, .actions { display: none !important; }
-  .sheet { width: 100%; margin: 0; padding: 0; box-shadow: none; }
+  @page { size: letter portrait; margin: 0.18in; }
+  html, body { width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: #fff !important; overflow: visible !important; }
+  body { zoom: 0.78; }
+  .no-print, .actions, .rpt-qr-link { display: none !important; }
+  .sheet { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; overflow: visible !important; }
   .title, th { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .panel { display: none !important; }
-  #tab-main { display: block !important; }
+  #tab-main { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  table { width: 100% !important; min-width: 0 !important; table-layout: fixed !important; }
+  tr, img, .paper-form, .report-header, .report-table-wrap { break-inside: avoid !important; page-break-inside: avoid !important; }
+  * { box-sizing: border-box !important; }
 }
 
 /* ---------- Paper form (follows the printed Store sheet) ---------- */
@@ -677,6 +681,20 @@ body.locked .auth-screen { display: flex; }
   background: #fff;
 }
 @media print {
+  #tab-main.rpt-mode .rpt-head .rpt-qr { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+#tab-main.rpt-mode .rpt-head .rpt-qr {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: #fff;
+}
+@media print {
   #tab-main.rpt-mode .rpt-head { break-inside: avoid; }
   #tab-main.rpt-mode .rpt-head .rpt-qr { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
@@ -929,3 +947,47 @@ body.admin-view .menu { gap: 6px; }
 body.admin-view #ddStore,
 body.admin-view #ddReport,
 body.admin-view #ddPresent { display: none !important; }
+
+/* FINAL PRINT FIX: keep the complete attendance report on a single page. */
+@media print {
+  @page { size: letter portrait; margin: 0.18in; }
+  html.rpt-print, html.rpt-print body {
+    height: auto !important; min-height: 0 !important; overflow: visible !important;
+  }
+  html.rpt-print .sheet {
+    height: auto !important; min-height: 0 !important;
+    padding: 0.12in 0.2in !important; margin: 0 !important;
+  }
+  html.rpt-print #tab-main.rpt-mode {
+    height: auto !important; min-height: 0 !important;
+    display: flex !important; flex-direction: column !important;
+    overflow: visible !important;
+  }
+  html.rpt-print #tab-main.rpt-mode .rpt-sign {
+    margin-top: 16px !important; padding-top: 14px !important;
+    break-inside: avoid !important; page-break-inside: avoid !important;
+  }
+  html.rpt-print #tab-main.rpt-mode .rpt-foot {
+    margin-top: 8px !important; padding-top: 5px !important;
+    break-inside: avoid !important; page-break-inside: avoid !important;
+  }
+  html.rpt-print #tab-main.rpt-mode .rpt-head { padding-top: 5px !important; padding-bottom: 5px !important; }
+  html.rpt-print #tab-main.rpt-mode .report-meta-row { margin-bottom: 6px !important; }
+  html.rpt-print #tab-main.rpt-mode .report-meta-details { padding: 5px 4px !important; }
+  html.rpt-print #tab-main.rpt-mode .totals { margin-top: 8px !important; }
+  html.rpt-print #tab-main.rpt-mode .total-line { padding-top: 3px !important; padding-bottom: 3px !important; }
+  html.rpt-print #tab-main.rpt-mode .rpt-sign,
+  html.rpt-print #tab-main.rpt-mode .rpt-foot,
+  html.rpt-print #tab-main.rpt-mode .table-wrap,
+  html.rpt-print #tab-main.rpt-mode .rpt-head { break-inside: avoid !important; page-break-inside: avoid !important; }
+}
+
+/* Registration Store selector and full-row registered-account editor */
+.auth-form select { width:100%; padding:11px 12px; border:1px solid #b7c2ba; border-radius:8px; background:#fff; font-size:16px; }
+.user-edit-overlay[hidden] { display:none !important; }
+.user-edit-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:18px; background:rgba(0,0,0,.55); overflow:auto; }
+.user-edit-card { width:min(100%,520px); max-height:calc(100vh - 36px); overflow:auto; padding:22px; border-radius:14px; background:#fff; box-shadow:0 18px 60px rgba(0,0,0,.3); display:flex; flex-direction:column; gap:7px; }
+.user-edit-card h2 { margin:0 0 10px; color:#174b30; }
+.user-edit-card label { margin-top:6px; font-weight:700; color:#174b30; }
+.user-edit-card input, .user-edit-card select { width:100%; min-height:42px; padding:9px 11px; border:1px solid #b7c2ba; border-radius:8px; background:#fff; font-size:16px; }
+.user-edit-card .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }

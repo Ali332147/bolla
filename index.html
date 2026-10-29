@@ -38,6 +38,11 @@
         <input id="regName" type="text" autocomplete="name" maxlength="50">
         <label for="regMobile">Mobile number</label>
         <input id="regMobile" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="+1 917 435 2695">
+        <label for="regStore">Store (Optional)</label><small id="regStoreOptionalHint" class="auth-hint">You can leave this blank and still create your account.</small>
+        <select id="regStore" autocomplete="organization-title" aria-describedby="regStoreOptionalHint">
+          <option value="">No store selected (optional)</option>
+          <option>109</option><option>170</option><option>211</option><option>236</option><option>400</option><option>450</option><option>525</option><option>540</option><option>542</option><option>750</option><option>1050</option><option>1490</option><option>2300</option><option>3239</option><option>3309</option>
+        </select>
         <label for="regUser">Email</label>
         <input id="regUser" type="email" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="254" placeholder="name@example.com">
         <label for="regPass">Password</label>
@@ -89,7 +94,7 @@
           <div class="rpt-title" id="rptTitle">Bolla Market</div>
           <div class="rpt-sub" data-i18n="rptSub">Attendance &amp; Shift Report</div>
         </div>
-        <a class="rpt-qr-link" href="https://ali332147.github.io/bollaempcard/" target="_blank" rel="noopener noreferrer" aria-label="Open Bolla Employee Card main site"><img class="rpt-qr" src="qr-code.png" alt="QR code — scan to open Bolla Employee Card main site"><span class="rpt-qr-link-label">Click to open main site</span></a>
+        <img class="rpt-qr" src="qr-code.png" alt="QR code">
       </header>
       <div class="marquee"><h2 class="paper-heading" id="marqueeText" data-i18n="Bolla Market" contenteditable="true" spellcheck="false">Bolla Market</h2></div>
       <div class="report-meta-row">
@@ -193,11 +198,24 @@
       <p class="hint">Important: this version stores accounts and roles in this browser only. It is not secure against a user who edits browser storage or JavaScript.</p>
     </section>
   </main>
+  <div id="editUserModal" class="user-edit-overlay" hidden>
+    <form id="editUserForm" class="user-edit-card" novalidate>
+      <h2>Edit Registered User</h2>
+      <label for="editUserName">Full name</label><input id="editUserName" type="text" maxlength="50" required>
+      <label for="editUserMobile">Mobile number</label><input id="editUserMobile" type="tel" maxlength="20" required>
+      <label for="editUserStore">Store (Optional)</label><select id="editUserStore"><option value="">No store selected (optional)</option><option>109</option><option>170</option><option>211</option><option>236</option><option>400</option><option>450</option><option>525</option><option>540</option><option>542</option><option>750</option><option>1050</option><option>1490</option><option>2300</option><option>3239</option><option>3309</option></select>
+      <label for="editUserEmail">Email</label><input id="editUserEmail" type="email" maxlength="254" required>
+      <label for="editUserRole">Role</label><select id="editUserRole"><option value="team">Team member</option><option value="admin">Admin</option></select>
+      <p id="editUserError" class="auth-error" role="alert" hidden></p>
+      <div class="actions"><button type="submit">Save Changes</button><button id="editUserCancel" class="secondary" type="button">Cancel</button></div>
+    </form>
+  </div>
+
   <footer class="site-footer no-print">
     <p>&copy; <span id="year">2026</span> Bolla. All rights reserved.</p>
   </footer>
 
   <script src="html2canvas.min.js"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=store-optional-fix-20261028"></script>
 </body>
 </html>
